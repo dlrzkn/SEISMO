@@ -143,4 +143,3 @@ export class UIManager {
         }, 1000);
     }
 }
-
