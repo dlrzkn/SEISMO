@@ -1,10 +1,4 @@
-import { defineConfig } from 'vite';
-
-export default defineConfig({
+export default {
   base: '/SEISMO/',
-  build: {
-    outDir: 'dist',
-    emptyOutDir: true
-  }
-});
-
+  // diğer ayarlar...
+}
