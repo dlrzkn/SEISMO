@@ -12,11 +12,12 @@ const SeismoApp = {
     async init() {
         console.log("SEISMO Terminal başlatılıyor...");
 
-        // 1. Haritayı Başlat (Görseldeki MapEngine.init metodunu kullanır)
+        // 1. Haritayı Başlat
         const map = MapEngine.init('map');
         MapEngine.initLayers();
 
         // 2. Arayüz Dinleyicilerini Kur (Filtre değişimlerini yakalar)
+        // Ok fonksiyonu (arrow function) kullanarak 'this' bağlamını koruyoruz
         UIController.init((newMag) => {
             this.currentMinMag = newMag;
             this.applyFilters();
@@ -24,6 +25,7 @@ const SeismoApp = {
 
         // 3. Harita tamamen yüklendiğinde veri döngüsünü başlat
         map.on('load', () => {
+            console.log("Harita yüklendi, veri akışı başlıyor...");
             this.startDataCycle();
         });
     },
@@ -32,10 +34,9 @@ const SeismoApp = {
         UIController.setLoading(true);
         
         try {
-            // EarthquakeService içindeki metot adının 'fetchAll' olduğundan emin ol
             const events = await EarthquakeService.fetchAll();
             
-            if (events) {
+            if (events && Array.isArray(events)) {
                 this.allEvents = events;
                 this.applyFilters();
             }
@@ -45,7 +46,8 @@ const SeismoApp = {
             UIController.setLoading(false);
         }
 
-        // 2 dakikada bir otomatik yenile (120000 ms)
+        // 2 dakikada bir otomatik yenile
+        // setTimeout içinde yine ok fonksiyonu kullanarak 'this' kaybını önlüyoruz
         setTimeout(() => this.startDataCycle(), 120000);
     },
 
@@ -53,10 +55,8 @@ const SeismoApp = {
         // Ham veriyi mevcut büyüklük filtresine göre süz
         const filtered = this.allEvents.filter(ev => ev.mag >= this.currentMinMag);
         
-        // Haritayı güncelle (MapEngine içindeki metot adı 'updateData' olmalı)
+        // Haritayı, beslemeyi ve analizleri güncelle
         MapEngine.updateData(filtered);
-        
-        // Yan panelleri ve analizleri güncelle
         UIController.renderFeed(filtered);
         UIController.updateAnalytics(filtered);
     }
