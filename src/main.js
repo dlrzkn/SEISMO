@@ -1,6 +1,6 @@
-import { MapEngine } from './core/map.js';
-import { UIController } from './ui/ui-controller.js';
+import { MapEngine } from './core/map-engine.js';
 import { EarthquakeService } from './services/earthquake.js';
+import { UIController } from './ui/ui-controller.js';
 
 /**
  * SEISMO | Ana Uygulama Başlatıcı (Senior Orchestrator)
