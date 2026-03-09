@@ -6,6 +6,7 @@
     height: calc(100vh - var(--header-height)); 
     width: 100%; 
     overflow: hidden;
+    background: #000; /* Boşluklarda beyaz sızıntı olmaması için */
 }
 
 /* Harita Katmanı: Arka planda tam ekran */
@@ -13,8 +14,8 @@
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%; /* vh/vw yerine % kullanımı bazı mobil tarayıcılarda daha kararlıdır */
+    height: 100%;
     z-index: 0;
     background: #0a0c10;
 }
@@ -25,11 +26,12 @@
     top: 0; 
     z-index: 10; 
     height: 100%; 
-    padding: 15px; 
+    padding: 20px; 
     display: flex; 
     flex-direction: column; 
-    gap: 15px; 
+    gap: 20px; 
     pointer-events: none;
+    box-sizing: border-box;
 }
 
 /* Panel içindeki elemanlar tıklanabilir olmalı */
@@ -66,7 +68,7 @@
     #map { 
         position: relative;
         width: 100%;
-        height: 50vh; /* Mobilde haritaya sabit yükseklik */
+        height: 60vh; /* Mobilde haritaya biraz daha fazla alan tanıdık */
         flex-shrink: 0;
     }
 
@@ -90,4 +92,4 @@
     .global-analytics { 
         display: none; 
     }
-} /* KRİTİK: Medya sorgusu burada kapanmalı */
+}
