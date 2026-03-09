@@ -6,9 +6,16 @@
     <title>SeismoPro | Sismolojik Analiz Terminali</title>
     
     <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../src/css/base.css">
+    <link rel="stylesheet" href="../src/css/layout.css">
+    <link rel="stylesheet" href="../src/css/components.css">
+    <link rel="stylesheet" href="../src/css/map-visuals.css">
+    <link rel="stylesheet" href="../src/css/style.css">
 </head>
 <body class="light-mode"> 
     <header class="top-bar">
@@ -42,10 +49,12 @@
         <aside class="sidebar control-sidebar">
             <div class="glass-card">
                 <h3>Sismik Filtreler</h3>
+                
                 <div class="filter-group">
                     <label>Eşik Değer (Mw): <span id="mag-value">0.0 Mw</span></label>
                     <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0">
                 </div>
+
                 <div class="filter-group">
                     <label>Zaman Penceresi</label>
                     <div class="btn-grid">
@@ -54,6 +63,7 @@
                         <button class="filter-btn" data-time="week">7G</button>
                     </div>
                 </div>
+
                 <div class="filter-group">
                     <label>Odak Derinliği</label>
                     <div class="btn-grid">
@@ -71,14 +81,15 @@
                     <button id="rotation-toggle" class="terminal-btn active">YÖRÜNGE: AKTİF</button>
                 </div>
                 <div class="control-row plate-row">
-                    <input type="checkbox" id="plate-boundaries" checked>
-                    <label for="plate-boundaries" class="switch-label">LEVHA SINIRLARINI GÖSTER</label>
+                    <button id="show-plate-boundaries" class="terminal-btn danger-btn">LEVHA SINIRLARINI GÖSTER</button>
                 </div>
             </div>
 
             <div class="glass-card stats-card">
                 <h3>Derinlik Dağılım Analizi</h3>
-                <div id="depth-analysis" class="analysis-box">Veriler işleniyor...</div>
+                <div id="depth-analysis" class="analysis-box">
+                    Veriler işleniyor...
+                </div>
             </div>
         </aside>
 
@@ -106,6 +117,7 @@
     </footer>
   
     <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
-    <script type="module" src="../src/js/main.js"></script>
+    
+    <script type="module" src="../src/main.js"></script>
 </body>
 </html>
