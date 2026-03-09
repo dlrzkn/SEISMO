@@ -1,7 +1,6 @@
 /* --- UI BİLEŞENLERİ --- */
 .glass-card { background: var(--bg-card); border: 1px solid var(--border-ui); border-radius: 12px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
 .glass-card h3 { font-size: 11px; text-transform: uppercase; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 15px; }
-
 .terminal-btn { 
     background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.2); 
     color: var(--accent); font-family: 'JetBrains Mono', monospace; font-size: 9px; 
