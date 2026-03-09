@@ -35,6 +35,7 @@ export const MapEngine = {
 
         this.map.on('style.load', () => {
             // Atmosfer efekti (Globe projeksiyonu için)
+            console.log("Harita stili başarıyla yüklendi, katmanlar ekleniyor...");
             this.map.setFog({
                 'range': [0.5, 10],
                 'color': '#0a0c10',
