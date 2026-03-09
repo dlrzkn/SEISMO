@@ -1,124 +1,26 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SeismoPro | Sismolojik Analiz Terminali</title>
-    
-    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="src/css/base.css">
-    <link rel="stylesheet" href="src/css/layout.css">
-    <link rel="stylesheet" href="src/css/components.css">
-    <link rel="stylesheet" href="src/css/map-visuals.css">
-    <link rel="stylesheet" href="src/css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SeismoPro</title>
 
-    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
-    
-    <script type="module" src="src/main.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css" rel="stylesheet"/>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="/src/css/style.css">
+
 </head>
-<body class="dark-mode"> 
-    <header class="top-bar">
-        <div class="brand-section">
-            <div class="status-indicator">
-                <div class="pulse-dot"></div>
-                <span class="live-text">LIVE</span>
-            </div>
-            <div class="logo-group">
-                <h1>SEISMO<span>PRO</span></h1>
-                <small class="sub-logo">Sismolojik Analiz Terminali</small>
-            </div>
-        </div>
 
-        <div class="global-analytics">
-            <div class="stat-node">
-                <span class="stat-label">Σ ENERJİ (<span id="energy-timerange">24S</span>):</span>
-                <span id="total-energy" class="stat-value">0.00 TJ</span>
-            </div>
-        </div>
+<body class="light-mode">
 
-        <div class="system-meta">
-            <div id="connection-status" class="status-tag">SİNYAL: GÜÇLÜ</div>
-            <div id="clock" class="mono-clock">00:00:00</div>
-        </div>
-    </header>
+<div id="map"></div>
 
-    <main class="app-container">
-        <div id="map"></div> 
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js"></script>
 
-        <aside class="sidebar control-sidebar">
-            <div class="glass-card">
-                <h3>Sismik Filtreler</h3>
-                
-                <div class="filter-group">
-                    <label>Eşik Değer (Mw): <span id="mag-value">0.0 Mw</span></label>
-                    <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0">
-                </div>
+<script type="module" src="/src/main.js"></script>
 
-                <div class="filter-group">
-                    <label>Zaman Penceresi</label>
-                    <div class="btn-grid">
-                        <button class="filter-btn" data-time="hour">1S</button>
-                        <button class="filter-btn active" data-time="day">24S</button>
-                        <button class="filter-btn" data-time="week">7G</button>
-                    </div>
-                </div>
-
-                <div class="filter-group">
-                    <label>Odak Derinliği</label>
-                    <div class="btn-grid">
-                        <button class="filter-btn active" data-depth="all">Tümü</button>
-                        <button class="filter-btn" data-depth="shallow">Sığ</button>
-                        <button class="filter-btn" data-depth="deep">Derin</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="glass-card layer-card">
-                <h3>SİSTEM & KATMAN YÖNETİMİ</h3>
-                <div class="control-grid">
-                    <button id="theme-toggle" class="terminal-btn">NASA BLUE</button>
-                    <button id="rotation-toggle" class="terminal-btn active">YÖRÜNGE: AKTİF</button>
-                </div>
-                <div class="control-row plate-row">
-                    <button id="show-plate-boundaries" class="terminal-btn danger-btn">LEVHA SINIRLARINI GÖSTER</button>
-                </div>
-            </div>
-
-            <div class="glass-card stats-card">
-                <h3>Derinlik Dağılım Analizi</h3>
-                <div id="depth-analysis" class="analysis-box">
-                    Veriler işleniyor...
-                </div>
-            </div>
-        </aside>
-
-        <aside class="sidebar feed-sidebar">
-            <div class="feed-header">
-                <div class="count-box">
-                    <span id="event-count">0</span> <small>DEPREM</small>
-                </div>
-                <div class="feed-controls">
-                    <button id="sort-time" class="sort-btn active" title="Zamana Göre Sırala">🕒</button>
-                    <button id="sort-mag" class="sort-btn" title="Büyüklüğe Göre Sırala">📊</button>
-                </div>
-            </div>
-            <div id="earthquake-feed" class="feed-scroll"></div>
-        </aside>
-    </main>
-
-    <footer class="map-legend">
-        <div class="source-pills">
-            <span class="pill usgs">USGS</span>
-            <span class="pill emsc">EMSC</span>
-            <span class="pill gfz">GFZ</span>
-        </div>
-        <div id="last-update" class="last-update">SON GÜNCELLEME: 0s ÖNCE</div>
-    </footer>
 </body>
 </html>
 
