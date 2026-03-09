@@ -49,3 +49,14 @@ export class UIManager {
     }
 }
 
+    // Slider hareketlerini dinleyen fonksiyon
+    attachEventListeners(onFilterChange) {
+        const slider = document.getElementById('mag-slider');
+        const magValue = document.getElementById('mag-value');
+
+        slider.addEventListener('input', (e) => {
+            const minMag = e.target.value;
+            magValue.innerText = `${minMag} Mw`;
+            onFilterChange(minMag);
+        });
+    }
