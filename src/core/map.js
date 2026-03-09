@@ -86,27 +86,36 @@ export class MapManager {
         });
     }
 
-    initLayers() {
-        this.map.addLayer({
-            id: 'earthquake-points',
-            type: 'circle',
-            source: 'earthquakes',
-            paint: {
-                // Jeofiziksel Büyüklük Standartları (Renk ve Boyut)
-                'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 4, 8, 6, 18, 8, 40],
-                'circle-color': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    2, '#00d2ff', // Düşük
-                    4, '#f1c40f', // Orta
-                    6, '#e67e22', // Yüksek
-                    7.5, '#ff4b2b' // Kritik
-                ],
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff',
-                'circle-opacity': 0.8
-            }
-        });
-    }
+   initLayers() {
+    this.map.addLayer({
+        id: 'earthquake-points',
+        type: 'circle',
+        source: 'earthquakes',
+        paint: {
+            // Sismolojik Büyüklük Sınıflandırması (Logaritmik Enerji Temsili)
+            'circle-radius': [
+                'interpolate', ['linear'], ['get', 'mag'],
+                2.0, 3,   // Mikro
+                4.0, 7,   // Küçük
+                5.5, 12,  // Orta
+                6.5, 22,  // Güçlü
+                7.5, 45   // Majör
+            ],
+            // Jeofiziksel Risk Renk Skalası (Net Kategori Geçişleri)
+            'circle-color': [
+                'step', ['get', 'mag'],
+                '#00d2ff', 3.0,  // < 3.0: Mikro (Mavi)
+                '#2ecc71', 4.5,  // 3.0 - 4.5: Küçük (Yeşil)
+                '#f1c40f', 6.0,  // 4.5 - 6.0: Orta (Sarı)
+                '#e67e22', 7.0,  // 6.0 - 7.0: Güçlü (Turuncu)
+                '#ff4b2b'        // > 7.0: Majör/Yıkıcı (Kırmızı)
+            ],
+            'circle-stroke-width': 1.2,
+            'circle-stroke-color': '#ffffff',
+            'circle-opacity': 0.85
+        }
+    });
+}
 
     updateData(events) {
         if (!this.map.getSource('earthquakes')) return;
