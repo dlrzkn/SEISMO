@@ -1,16 +1,45 @@
 import { MapEngine } from './core/map.js';
 import { UIController } from './ui/ui-controller.js';
-// EarthquakeService importunu veri çekme aşamasında ekleyeceğiz
+import { EarthquakeService } from './services/earthquake.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    // 1. UI Başlat
-    UIController.init();
+/**
+ * SEISMO | Ana Uygulama Başlatıcı (Senior Orchestrator)
+ */
+const SeismoApp = {
+    async init() {
+        console.log("SEISMO Terminal başlatılıyor...");
 
-    // 2. Harita Başlat
-    const map = MapEngine.init('map');
+        // 1. UI Kontrollerini ve Saati Başlat
+        UIController.init();
 
-    // 3. Sistem Saati ve Meta Güncelleme
-    setInterval(() => {
-        // ui-controller içindeki saat fonksiyonu burada tetiklenebilir
-    }, 1000);
-});
+        // 2. Harita Motorunu Kur (Mapbox Globe)
+        const map = MapEngine.init('map');
+
+        // 3. Harita Yüklendiğinde Veri Döngüsünü Başlat
+        map.on('load', () => {
+            this.startDataCycle();
+            // 5 dakikada bir otomatik güncelleme
+            setInterval(() => this.startDataCycle(), 300000);
+        });
+    },
+
+    async startDataCycle() {
+        UIController.setLoading(true);
+        
+        // Servis üzerinden verileri çek (ilk kodundaki fetchSeismicData mantığı)
+        const events = await EarthquakeService.fetchEarthquakes();
+        
+        if (events) {
+            // Haritadaki noktaları güncelle
+            MapEngine.updateSource(events);
+            // Sağ paneli ve istatistikleri güncelle
+            UIController.renderFeed(events);
+            UIController.updateAnalytics(events);
+        }
+
+        UIController.setLoading(false);
+    }
+};
+
+// Sayfa hazır olduğunda uygulamayı ateşle
+document.addEventListener('DOMContentLoaded', () => SeismoApp.init());
