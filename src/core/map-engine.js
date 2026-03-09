@@ -8,9 +8,9 @@ export const MapEngine = {
      * Harita motorunu başlatır
      * @param {string} containerId - Haritanın yükleneceği HTML element ID'si
      */
-    init(containerId) {
-        // Token'ı ortam değişkeninden al (Senior Standartı)
-        mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+       init(containerId) {
+        // Token artık doğrudan tanımlı, bu doğru.
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8QN';
 
         this.map = new mapboxgl.Map({
             container: containerId,
@@ -21,8 +21,12 @@ export const MapEngine = {
             antialias: true
         });
 
+        // KRİTİK EKSİK: Katmanları başlatan fonksiyonu burada çağırıyoruz
+        this.initLayers(); 
+
         return this.map;
     },
+
 
     /**
      * Sismik veri katmanlarını hazırlar
