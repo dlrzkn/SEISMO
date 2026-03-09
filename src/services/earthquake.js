@@ -1,48 +1,41 @@
-export class EarthquakeService {
-    constructor() {
-        this.endpoints = [
-            { id: 'USGS', url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson' },
-            { id: 'EMSC', url: 'https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=500' }
-        ];
-    }
+/**
+ * Earthquake Service - Sismik Veri Sağlayıcı
+ */
+export const EarthquakeService = {
+    // Vite üzerinden .env değişkenine erişim
+    baseUrl: import.meta.env.VITE_API_BASE_URL,
 
-    async fetchAll() {
+    /**
+     * Güncel deprem verilerini çeker
+     * @param {string} period - 'hour', 'day', 'week'
+     * @returns {Promise<Object>} GeoJSON verisi
+     */
+    async fetchEarthquakes(period = 'day') {
         try {
-            const results = await Promise.allSettled(
-                this.endpoints.map(api => fetch(api.url).then(res => res.json()))
-            );
+            const response = await fetch(`${this.baseUrl}all_${period}.geojson`);
+            if (!response.ok) throw new Error('API bağlantı hatası');
             
-            let allEvents = [];
-            results.forEach((res, index) => {
-                if (res.status === 'fulfilled') {
-                    const normalized = this.normalize(res.value, this.endpoints[index].id);
-                    allEvents.push(...normalized);
-                }
-            });
-
-            return allEvents;
+            const data = await response.json();
+            return this.transformData(data);
         } catch (error) {
-            console.error("Sismik veri hatası:", error);
-            return [];
+            console.error('Sismik veri çekilirken hata oluştu:', error);
+            return null;
         }
-    }
+    },
 
-    // Farklı API'lardan gelen verileri tek tipe sokan "Senior" süzgeç
-    normalize(data, source) {
-        const features = data.features || (Array.isArray(data) ? data : []);
-        return features.map(f => {
-            const p = f.properties || f;
-            const coords = f.geometry?.coordinates || [p.longitude, p.latitude, p.depth];
-            
-            return {
-                id: p.id || p.unid || Math.random().toString(36),
-                mag: parseFloat(p.mag || p.magnitude || 0),
-                place: (p.place || p.region || "Bilinmeyen Bölge").toUpperCase(),
-                time: new Date(p.time || p.m_time).getTime(),
-                depth: Math.abs(parseFloat(coords[2] || 0)),
-                coordinates: [coords[0], coords[1]],
-                source: source
-            };
-        });
+    /**
+     * Gelen veriyi uygulama içinde kullanılabilir hale getirir (Normalization)
+     */
+    transformData(geoJson) {
+        return geoJson.features.map(feature => ({
+            id: feature.id,
+            mag: feature.properties.mag,
+            place: feature.properties.place,
+            time: new Date(feature.properties.time),
+            coordinates: feature.geometry.coordinates,
+            depth: feature.geometry.coordinates[2],
+            url: feature.properties.url
+        }));
     }
-}
+};
+
