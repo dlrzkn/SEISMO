@@ -1,3 +1,5 @@
+import './css/style.css';
+
 console.log("SeismoPro sistemi başlatıldı...");
 
 document.getElementById('app').innerHTML = `
@@ -5,4 +7,3 @@ document.getElementById('app').innerHTML = `
         Sistem Yükleniyor...
     </h1>
 `;
-
