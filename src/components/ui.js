@@ -1,93 +1,111 @@
 export class UIManager {
     constructor() {
-        this.appContainer = document.getElementById('app');
+        this.container = document.body;
+        this.orbitActive = false; // Yörünge butonu durumu
     }
 
-    // Ana arayüz iskeletini oluşturur
     renderSkeleton() {
-        this.appContainer.innerHTML = `
-            <header class="top-bar">
-                <div class="brand-section">
-                    <div class="status-indicator">
-                        <div class="pulse-dot"></div>
-                        <span class="live-text">LIVE</span>
-                    </div>
-                    <div class="logo-group">
-                        <h1>SEISMO<span>PRO</span></h1>
-                        <small class="sub-logo">Sismolojik Analiz Terminali</small>
-                    </div>
+        this.container.innerHTML = `
+            <div class="top-bar">
+                <div class="brand">
+                    <span class="live-indicator">LIVE</span>
+                    <h1>SEISMOPRO <small>SİSMOLOJİK ANALİZ TERMİNALİ</small></h1>
                 </div>
-                <div class="global-analytics">
-                    <div class="stat-node">
-                        <span class="stat-label">Σ ENERJİ (24S):</span>
-                        <span id="total-energy" class="stat-value">0.00 TJ</span>
-                    </div>
+                <div class="global-stats">
+                    Σ ENERJİ (24S): <span id="total-energy" style="color: #00d2ff; font-weight: bold;">0.00</span> TJ
                 </div>
-            </header>
-            <main class="app-container">
-                <div id="map"></div> 
-                <aside class="sidebar control-sidebar">
-                    <div class="glass-card">
-                        <h3>Sismik Filtreler</h3>
-                        <div class="filter-group">
-                            <label>Eşik Değer (Mw): <span id="mag-value">0.0 Mw</span></label>
-                            <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0">
+                <div class="system-status">
+                    <span class="signal-tag">SİNYAL: GÜÇLÜ</span>
+                    <span id="live-clock">00:00:00</span>
+                </div>
+            </div>
+
+            <div class="app-container">
+                <aside class="sidebar-left">
+                    <div class="panel">
+                        <h3>| SİSMİK FİLTRELER</h3>
+                        <label>Eşik Değer (Mw): <span id="mag-val">0.0</span></label>
+                        <input type="range" id="mag-filter" min="0" max="9" step="0.1" value="0">
+                        
+                        <div class="btn-group">
+                            <button id="toggle-orbit" class="btn-inactive">YÖRÜNGE: PASİF</button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>| ANALİZ ARAÇLARI</h3>
+                        <div class="depth-stats">
+                            <p>SIĞ: %<span id="shallow-pct">0</span></p>
+                            <p>DERİN: %<span id="deep-pct">0</span></p>
+                            <div class="depth-bar-bg"><div id="depth-bar-fill"></div></div>
                         </div>
                     </div>
                 </aside>
-                <aside class="sidebar feed-sidebar">
+
+                <main id="map"></main>
+
+                <aside class="sidebar-right">
                     <div class="feed-header">
-                        <div class="count-box">
-                            <span id="event-count">0</span> <small>DEPREM</small>
-                        </div>
+                        <span id="event-count">0</span> DEPREM LİSTESİ
                     </div>
                     <div id="earthquake-feed" class="feed-scroll"></div>
                 </aside>
-            </main>
+            </div>
+
+            <footer class="footer">
+                <div class="source-info">SOURCES: USGS | EMSC | GFZ</div>
+                <div class="timer">SON GÜNCELLEME: <span id="last-update">0</span>S ÖNCE</div>
+            </footer>
         `;
+        this.startClock();
     }
 
-    // Deprem listesini günceller
+    // Jeofiziksel Renk Ataması (Haritayla 1:1 Uyumlu)
+    getSeismicColor(mag) {
+        if (mag < 3.0) return '#00d2ff';
+        if (mag < 4.5) return '#2ecc71';
+        if (mag < 6.0) return '#f1c40f';
+        if (mag < 7.2) return '#e67e22';
+        return '#ff4b2b';
+    }
+
     updateFeed(events) {
-        const feedContainer = document.getElementById('earthquake-feed');
-        const countEl = document.getElementById('event-count');
+        const feed = document.getElementById('earthquake-feed');
+        const count = document.getElementById('event-count');
+        count.innerText = events.length;
         
-        if (countEl) countEl.innerText = events.length;
-        if (feedContainer) {
-            feedContainer.innerHTML = events.map(ev => `
-                <div class="earthquake-node">
-                    <div style="font-weight: 800; color: #00d2ff;">${ev.mag.toFixed(1)}</div>
-                    <div>
-                        <div style="font-size: 13px; font-weight: 600;">${ev.place}</div>
-                        <div style="font-size: 11px; opacity: 0.6;">${new Date(ev.time).toLocaleTimeString()}</div>
-                    </div>
+        feed.innerHTML = events.map(ev => `
+            <div class="earthquake-node" style="border-left: 4px solid ${this.getSeismicColor(ev.mag)}">
+                <div class="mag-badge">${ev.mag.toFixed(1)}</div>
+                <div class="info">
+                    <strong>${ev.place}</strong>
+                    <div class="meta">Derinlik: ${ev.depth}km | ${ev.time}</div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
     }
 
-    // Enerji hesaplama ve gösterim
-    updateAnalytics(events) {
-        let totalJ = 0;
-        events.forEach(ev => totalJ += Math.pow(10, 4.8 + (1.5 * ev.mag)));
-        const energyEl = document.getElementById('total-energy');
-        if (energyEl) {
-            energyEl.innerText = `${(totalJ / 1e12).toFixed(2)} TJ`;
-        }
+    attachEventListeners(onFilter, onOrbitToggle) {
+        const magSlider = document.getElementById('mag-filter');
+        const orbitBtn = document.getElementById('toggle-orbit');
+
+        magSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            document.getElementById('mag-val').innerText = val.toFixed(1);
+            onFilter(val);
+        });
+
+        orbitBtn.addEventListener('click', () => {
+            this.orbitActive = !this.orbitActive;
+            orbitBtn.innerText = this.orbitActive ? "YÖRÜNGE: AKTİF" : "YÖRÜNGE: PASİF";
+            orbitBtn.className = this.orbitActive ? "btn-active" : "btn-inactive";
+            onOrbitToggle(this.orbitActive);
+        });
     }
 
-    // Olay dinleyiciler
-    attachEventListeners(onFilterChange) {
-        const slider = document.getElementById('mag-slider');
-        const magValue = document.getElementById('mag-value');
-
-        if (slider && magValue) {
-            slider.addEventListener('input', (e) => {
-                const minMag = e.target.value;
-                magValue.innerText = `${minMag} Mw`;
-                onFilterChange(minMag);
-            });
-        }
+    startClock() {
+        setInterval(() => {
+            document.getElementById('live-clock').innerText = new Date().toLocaleTimeString();
+        }, 1000);
     }
 }
-
