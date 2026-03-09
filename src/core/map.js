@@ -18,6 +18,21 @@ export class MapManager {
             this.initSources();
             this.initLayers();
         });
+
+        // Tıklama olayını (Popup) buraya ekledik
+        this.map.on('click', 'earthquake-points', (e) => {
+            const p = e.features[0].properties;
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML(`
+                    <div style="color: #000; padding: 5px;">
+                        <h3 style="margin: 0; color: #c0392b;">Mw ${parseFloat(p.mag).toFixed(1)}</h3>
+                        <p style="margin: 5px 0; font-weight: bold;">${p.place}</p>
+                        <small style="color: #666;">Derinlik: ${parseFloat(p.depth).toFixed(1)} km</small>
+                    </div>
+                `)
+                .addTo(this.map);
+        });
     }
 
     // Harita veri kaynağını oluşturur
