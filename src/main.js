@@ -28,3 +28,9 @@ const app = {
 };
 
 app.init();
+        // 5. Filtreleme olaylarını dinle
+        this.uiManager.attachEventListeners((minMag) => {
+            const filtered = events.filter(ev => ev.mag >= minMag);
+            this.mapManager.updateData(filtered);
+            this.uiManager.updateFeed(filtered);
+        });
