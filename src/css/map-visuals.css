@@ -1,14 +1,43 @@
+/* --- HARİTA KONTEYNERI (KRİTİK EKLEME) --- */
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    background-color: #0a0c10; /* Harita yüklenirken beyaz ekranı engeller */
+}
+
 /* --- HARİTA GÖRSELLEŞTİRME --- */
 .mapboxgl-popup-content {
-    background: rgba(10, 12, 16, 0.9) !important; backdrop-filter: blur(15px); border: 1px solid var(--accent);
-    border-radius: 8px !important; padding: 15px !important; color: var(--text-primary);
+    background: rgba(10, 12, 16, 0.9) !important; 
+    backdrop-filter: blur(15px); 
+    border: 1px solid var(--accent);
+    border-radius: 8px !important; 
+    padding: 15px !important; 
+    color: var(--text-primary);
 }
 
 /* Nasa Blue & Yıldızlar */
-body.light-mode .app-container::before {
-    content: ""; position: absolute; width: 250%; height: 250%; top: -75%; left: -75%;
-    background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 100px 150px, #ffffff, rgba(0,0,0,0));
-    background-size: 400px 400px; animation: starRotationGunduz 200s linear infinite; opacity: 0.3; z-index: 0;
+/* Not: Karanlık modda da görünmesi için sadece .light-mode kısıtlamasını kaldırabilirsin */
+.app-container::before {
+    content: ""; 
+    position: absolute; 
+    width: 250%; 
+    height: 250%; 
+    top: -75%; 
+    left: -75%;
+    background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)), 
+                      radial-gradient(1.5px 1.5px at 100px 150px, #ffffff, rgba(0,0,0,0));
+    background-size: 400px 400px; 
+    animation: starRotationGunduz 200s linear infinite; 
+    opacity: 0.3; 
+    z-index: 0;
+    pointer-events: none; /* Harita tıklamalarını engellememesi için */
 }
 
-@keyframes starRotationGunduz { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes starRotationGunduz { 
+    from { transform: rotate(0deg); } 
+    to { transform: rotate(360deg); } 
+}
