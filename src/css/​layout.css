@@ -1,18 +1,102 @@
-.top-bar {
-    height: var(--header-height);
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-ui);
-    backdrop-filter: blur(12px);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 1000;
+/* --- src/css/layout.css --- */
+
+/* Ana Uygulama Konteynırı */
+.app-container {
+    display: grid;
+    grid-template-columns: 320px 1fr 350px; /* Sol Panel - Harita - Sağ Akış */
+    height: calc(100vh - 60px); /* Header yüksekliği çıkarıldı */
+    overflow: hidden;
+    position: relative;
 }
 
-.app-container { position: relative; height: calc(100vh - var(--header-height)); width: 100%; }
-.sidebar { position: absolute; top: 0; z-index: 10; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-.sidebar > * { pointer-events: auto; }
-.control-sidebar { left: 0; width: 300px; }
-.feed-sidebar { right: 0; width: var(--sidebar-width); background: var(--bg-card); border-left: 1px solid var(--border-ui); backdrop-filter: blur(20px); padding: 0; }
+/* Harita Katmanı */
+#map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
 
+/* Sidebars Genel */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(10, 15, 25, 0.8);
+    backdrop-filter: blur(12px);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 10;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.feed-sidebar {
+    border-right: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* --- RESPONSIVE KATMANI (Senior Dokunuşu) --- */
+
+/* Tablet ve Küçük Ekranlar (Yatay/Geniş Tabletler Hariç) */
+@media (max-width: 1200px) {
+    .app-container {
+        grid-template-columns: 300px 1fr; /* Sağ paneli daralt veya gizle */
+    }
+    .feed-sidebar {
+        display: none; /* Mobilde/Tablette akışı opsiyonel yapabiliriz */
+    }
+}
+
+/* Telefonlar ve Dikey Tabletler (İşte Çözüm Burada) */
+@media (max-width: 768px) {
+    .app-container {
+        display: flex;
+        flex-direction: column; /* Üst üste dizilim */
+        height: 100vh;
+    }
+
+    #map {
+        flex: 1; /* Harita kalan tüm alanı doldursun */
+        min-height: 50vh; 
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        max-height: 40vh; /* Paneller ekranın altında kalsın, haritayı kapatmasın */
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        border-radius: 20px 20px 0 0;
+        border-top: 2px solid var(--accent-color, #00d4ff);
+        padding-bottom: 30px;
+    }
+
+    /* Mobilde kontrol paneli ve akış paneli arası geçiş için logic gerekecek */
+    /* Şimdilik sadece ana kontrol panelini gösterelim */
+    .feed-sidebar {
+        display: none; 
+    }
+
+    .top-bar {
+        padding: 5px 15px;
+        font-size: 0.8rem;
+    }
+
+    .logo-group h1 {
+        font-size: 1.2rem;
+    }
+
+    .global-analytics {
+        display: none; /* Küçük ekranda kalabalığı önle */
+    }
+}
+
+/* Kaydırma Çubuğu Estetiği */
+.sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
