@@ -92,14 +92,18 @@ export const UIController = {
     /**
      * Olay dinleyicilerini bağlar
      */
-    attachListeners() {
+       attachListeners() {
         if (this.elements.magSlider) {
             this.elements.magSlider.oninput = (e) => {
-                this.elements.magValue.innerText = `${e.target.value} Mw`;
-                // Burada ana uygulama üzerinden filtreleme tetiklenebilir
+                const val = e.target.value;
+                this.elements.magValue.innerText = `${val} Mw`;
+                
+                // Global bir event yayınlayarak main.js'in haberdar olmasını sağlayalım
+                window.dispatchEvent(new CustomEvent('seismo:filter', { detail: { minMag: val } }));
             };
         }
     },
+
 
     getMagColor: m => m >= 7 ? '#c0392b' : m >= 5 ? '#e67e22' : m >= 3 ? '#f1c40f' : '#2ecc71',
 
