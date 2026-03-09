@@ -1,36 +1,41 @@
 import './css/style.css';
 import { MapManager } from './core/map';
 import { EarthquakeService } from './services/earthquake';
-import { UIManager } from './components/ui'; // Yeni modülü import et
+import { UIManager } from './components/ui';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q';
 
 const app = {
     async init() {
-        // 1. Arayüz yöneticisini başlat ve iskeleti kur
+        // 1. UI ve Harita başlatma
         this.uiManager = new UIManager();
         this.uiManager.renderSkeleton();
 
-        // 2. Haritayı başlat (ID artık 'map' olarak UI Manager'dan geliyor)
         this.mapManager = new MapManager('map', MAPBOX_TOKEN);
         this.mapManager.init();
 
-        // 3. Veri servisini başlat
+        // 2. Veri servisi başlatma
         this.earthquakeService = new EarthquakeService();
         
-        // 4. Verileri çek, haritayı ve listeyi güncelle
-        const events = await this.earthquakeService.fetchAll();
-        this.mapManager.updateData(events);
-        this.uiManager.updateFeed(events); // Listeyi doldur
+        // 3. Verileri çek ve ilk gösterimi yap
+        const allEvents = await this.earthquakeService.fetchAll();
+        this.renderData(allEvents);
+
+        // 4. Filtreleme olaylarını dinle
+        this.uiManager.attachEventListeners((minMag) => {
+            const filtered = allEvents.filter(ev => ev.mag >= minMag);
+            this.renderData(filtered);
+        });
 
         console.log("Sistem tüm bileşenleriyle aktif.");
+    },
+
+    // Hem haritayı hem UI'ı aynı anda güncelleyen yardımcı fonksiyon
+    renderData(events) {
+        this.mapManager.updateData(events);
+        this.uiManager.updateFeed(events);
+        this.uiManager.updateAnalytics(events);
     }
 };
 
 app.init();
-        // 5. Filtreleme olaylarını dinle
-        this.uiManager.attachEventListeners((minMag) => {
-            const filtered = events.filter(ev => ev.mag >= minMag);
-            this.mapManager.updateData(filtered);
-            this.uiManager.updateFeed(filtered);
-        });
