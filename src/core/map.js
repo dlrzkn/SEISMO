@@ -3,39 +3,82 @@ import mapboxgl from 'mapbox-gl';
 export class MapManager {
     constructor(containerId, token) {
         mapboxgl.accessToken = token;
+        this.orbitActive = false; // Buton basılana kadar kapalı
+        this.userInteracting = false;
+        this.interactionTimeout = null;
+
         this.map = new mapboxgl.Map({
             container: containerId,
-            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            style: 'mapbox://styles/mapbox/satellite-v9', // NASA Blue havası için v9 daha uygundur
             center: [35, 39],
-            zoom: 2.5,
-            projection: 'globe'
+            zoom: 2.0,
+            projection: 'globe',
+            pitch: 45 // Derinlik hissi
         });
     }
 
     init() {
         this.map.on('style.load', () => {
-            this.map.setFog({});
+            // Atmosfer ve Uzay efekti (Eski projedeki o derinlik)
+            this.map.setFog({
+                color: 'rgb(11, 11, 25)',
+                'high-color': 'rgb(36, 92, 223)',
+                'horizon-blend': 0.02,
+                'space-color': 'rgb(11, 11, 25)',
+                'star-intensity': 0.6
+            });
             this.initSources();
             this.initLayers();
+            this.startOrbit(); // Döngüyü başlat
         });
 
-        // Tıklama olayını (Popup) buraya ekledik
+        // Etkileşim Zekası (3 saniye kuralı)
+        const handleInteraction = () => {
+            this.userInteracting = true;
+            clearTimeout(this.interactionTimeout);
+            this.interactionTimeout = setTimeout(() => {
+                this.userInteracting = false;
+            }, 3000);
+        };
+
+        this.map.on('mousedown', handleInteraction);
+        this.map.on('touchstart', handleInteraction);
+        this.map.on('wheel', handleInteraction);
+
+        // Tıklama olayını (Şık Pop-up) buraya ekledik
         this.map.on('click', 'earthquake-points', (e) => {
             const p = e.features[0].properties;
-            new mapboxgl.Popup()
+            // Burayı ilerde UI.js ile birleştirip o büyük kartı açacağız
+            new mapboxgl.Popup({ className: 'custom-popup' })
                 .setLngLat(e.lngLat)
                 .setHTML(`
-                    <div style="color: #000; padding: 5px;">
-                        <h3 style="margin: 0; color: #c0392b;">Mw ${parseFloat(p.mag).toFixed(1)}</h3>
-                        <p style="margin: 5px 0; font-weight: bold;">${p.place}</p>
-                        <small style="color: #666;">Derinlik: ${parseFloat(p.depth).toFixed(1)} km</small>
+                    <div style="background: rgba(10,10,10,0.9); color: white; padding: 10px; border: 1px solid #00d2ff;">
+                        <h2 style="color: #ff4b2b; margin:0;">${p.mag} Mw</h2>
+                        <p>${p.place}</p>
+                        <small>Derinlik: ${p.depth}km</small>
                     </div>
                 `)
                 .addTo(this.map);
         });
     }
 
-    // Harita veri kaynağını oluşturur
+    // Yörünge kontrolü için dışardan çağrılacak metod
+    toggleOrbit(status) {
+        this.orbitActive = status;
+    }
+
+    startOrbit() {
+        const rotate = () => {
+            if (this.orbitActive && !this.userInteracting) {
+                const center = this.map.getCenter();
+                center.lng -= 0.1; // Dönüş hızı
+                this.map.easeTo({ center, duration: 100, easing: n => n });
+            }
+            requestAnimationFrame(rotate);
+        };
+        rotate();
+    }
+
     initSources() {
         this.map.addSource('earthquakes', {
             type: 'geojson',
@@ -43,26 +86,30 @@ export class MapManager {
         });
     }
 
-    // Harita katmanlarını (noktaları) oluşturur
     initLayers() {
         this.map.addLayer({
             id: 'earthquake-points',
             type: 'circle',
             source: 'earthquakes',
             paint: {
-                'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 6, 15, 9, 45],
-                'circle-color': ['interpolate', ['linear'], ['get', 'mag'], 3, '#2ecc71', 5, '#f1c40f', 7, '#e67e22', 8, '#c0392b'],
-                'circle-stroke-width': 1.5,
+                // Jeofiziksel Büyüklük Standartları (Renk ve Boyut)
+                'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 4, 8, 6, 18, 8, 40],
+                'circle-color': [
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    2, '#00d2ff', // Düşük
+                    4, '#f1c40f', // Orta
+                    6, '#e67e22', // Yüksek
+                    7.5, '#ff4b2b' // Kritik
+                ],
+                'circle-stroke-width': 1,
                 'circle-stroke-color': '#fff',
                 'circle-opacity': 0.8
             }
         });
     }
 
-    // Gelen temiz veriyi haritaya yükleyen fonksiyon
     updateData(events) {
         if (!this.map.getSource('earthquakes')) return;
-
         const geojson = {
             type: 'FeatureCollection',
             features: events.map(ev => ({
@@ -71,7 +118,6 @@ export class MapManager {
                 properties: { ...ev }
             }))
         };
-
         this.map.getSource('earthquakes').setData(geojson);
     }
 }
