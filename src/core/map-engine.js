@@ -6,8 +6,10 @@ export const MapEngine = {
 
     /**
      * Harita motorunu başlatır
+     * @param {string} containerId - Haritanın yükleneceği HTML element ID'si
      */
     init(containerId) {
+        // Token'ı ortam değişkeninden al (Senior Standartı)
         mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
         this.map = new mapboxgl.Map({
@@ -15,48 +17,36 @@ export const MapEngine = {
             style: 'mapbox://styles/mapbox/dark-v11',
             center: [35, 39],
             zoom: 2.5,
-            projection: 'globe'
-        });
-
-        this.map.on('style.load', () => {
-            this.setupAtmosphere();
-            this.initSources();
-            this.initLayers();
+            projection: 'globe',
+            antialias: true
         });
 
         return this.map;
     },
 
     /**
-     * Uzay ve atmosfer efektlerini kurar
+     * Sismik veri katmanlarını hazırlar
      */
-    setupAtmosphere() {
-        this.map.setFog({
-            'range': [0.5, 10],
-            'color': '#0a0c10',
-            'high-color': '#161c24',
-            'space-color': '#000000',
-            'horizon-blend': 0.05
-        });
-    },
+    initLayers() {
+        if (!this.map) return;
 
-    /**
-     * GeoJSON veri kaynaklarını tanımlar
-     */
-    initSources() {
-        if (!this.map.getSource('earthquakes')) {
+        this.map.on('style.load', () => {
+            // Atmosfer efektini ayarla (Globe projeksiyonu için)
+            this.map.setFog({
+                'range': [0.5, 10],
+                'color': '#0a0c10',
+                'high-color': '#161c24',
+                'space-color': '#000000',
+                'horizon-blend': 0.05
+            });
+
+            // Deprem verisi için GeoJSON kaynağını ekle
             this.map.addSource('earthquakes', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
             });
-        }
-    },
 
-    /**
-     * Sismik noktaların görsel stillerini tanımlar (Büyüklüğe göre renk ve boyut)
-     */
-    initLayers() {
-        if (!this.map.getLayer('earthquake-points')) {
+            // Görselleştirme katmanını ekle
             this.map.addLayer({
                 id: 'earthquake-points',
                 type: 'circle',
@@ -64,10 +54,9 @@ export const MapEngine = {
                 paint: {
                     'circle-radius': [
                         'interpolate', ['linear'], ['get', 'mag'],
-                        1, 3,
-                        4, 8,
+                        1, 4,
                         6, 15,
-                        9, 40
+                        9, 45
                     ],
                     'circle-color': [
                         'interpolate', ['linear'], ['get', 'mag'],
@@ -77,29 +66,28 @@ export const MapEngine = {
                         8, '#c0392b'
                     ],
                     'circle-stroke-width': 1.5,
-                    'circle-stroke-color': '#ffffff',
+                    'circle-stroke-color': '#fff',
                     'circle-opacity': 0.8
                 }
             });
-        }
+        });
     },
 
     /**
-     * Gelen sismik verileri haritada günceller
+     * Haritadaki deprem verilerini günceller
+     * @param {Array} events - Normalize edilmiş deprem verileri
      */
-    updateSource(events) {
+    updateData(events) {
         const source = this.map.getSource('earthquakes');
-        if (!source) return;
-
-        const geojson = {
-            type: 'FeatureCollection',
-            features: events.map(ev => ({
-                type: 'Feature',
-                geometry: { type: 'Point', coordinates: ev.coordinates },
-                properties: { ...ev }
-            }))
-        };
-
-        source.setData(geojson);
+        if (source) {
+            source.setData({
+                type: 'FeatureCollection',
+                features: events.map(ev => ({
+                    type: 'Feature',
+                    geometry: { type: 'Point', coordinates: ev.coordinates },
+                    properties: { ...ev }
+                }))
+            });
+        }
     }
 };
