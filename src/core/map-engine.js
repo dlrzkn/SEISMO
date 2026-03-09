@@ -8,8 +8,8 @@ export const MapEngine = {
      * Harita motorunu başlatır
      * @param {string} containerId - Haritanın yükleneceği HTML element ID'si
      */
-       init(containerId) {
-        // Token artık doğrudan tanımlı, bu doğru.
+    init(containerId) {
+        // Token doğrudan tanımlı
         mapboxgl.accessToken = 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8QN';
 
         this.map = new mapboxgl.Map({
@@ -21,12 +21,11 @@ export const MapEngine = {
             antialias: true
         });
 
-        // KRİTİK EKSİK: Katmanları başlatan fonksiyonu burada çağırıyoruz
+        // Katmanları başlat
         this.initLayers(); 
 
         return this.map;
     },
-
 
     /**
      * Sismik veri katmanlarını hazırlar
@@ -35,7 +34,7 @@ export const MapEngine = {
         if (!this.map) return;
 
         this.map.on('style.load', () => {
-            // Atmosfer efektini ayarla (Globe projeksiyonu için)
+            // Atmosfer efekti (Globe projeksiyonu için)
             this.map.setFog({
                 'range': [0.5, 10],
                 'color': '#0a0c10',
@@ -44,13 +43,13 @@ export const MapEngine = {
                 'horizon-blend': 0.05
             });
 
-            // Deprem verisi için GeoJSON kaynağını ekle
+            // Boş GeoJSON kaynağını ekle
             this.map.addSource('earthquakes', {
                 type: 'geojson',
                 data: { type: 'FeatureCollection', features: [] }
             });
 
-            // Görselleştirme katmanını ekle
+            // Deprem noktalarını görselleştir
             this.map.addLayer({
                 id: 'earthquake-points',
                 type: 'circle',
@@ -82,16 +81,19 @@ export const MapEngine = {
      * @param {Array} events - Normalize edilmiş deprem verileri
      */
     updateData(events) {
+        if (!this.map) return;
+        
         const source = this.map.getSource('earthquakes');
-        if (source) {
-            source.setData({
-                type: 'FeatureCollection',
-                features: events.map(ev => ({
-                    type: 'Feature',
-                    geometry: { type: 'Point', coordinates: ev.coordinates },
-                    properties: { ...ev }
-                }))
-            });
-        }
+        // Kaynak henüz yüklenmemişse (style.load bekliyorsa) işlemi durdur
+        if (!source) return;
+
+        source.setData({
+            type: 'FeatureCollection',
+            features: events.map(ev => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: ev.coordinates },
+                properties: { ...ev }
+            }))
+        });
     }
 };
