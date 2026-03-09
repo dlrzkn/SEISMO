@@ -5,6 +5,7 @@
     position: relative; 
     height: calc(100vh - var(--header-height)); 
     width: 100%; 
+    overflow: hidden;
 }
 
 /* Harita Katmanı: Arka planda tam ekran */
@@ -15,9 +16,8 @@
     width: 100vw;
     height: 100vh;
     z-index: 0;
-    background: #0a0c10; /* Harita yüklenene kadar beyaz ekranı engeller */
+    background: #0a0c10;
 }
-
 
 /* Sidebars Genel: Harita üzerinde yüzen paneller */
 .sidebar { 
@@ -28,8 +28,8 @@
     padding: 15px; 
     display: flex; 
     flex-direction: column; 
-    gap: 10px; 
-    pointer-events: none; /* Tıklamaların haritaya geçebilmesi için */
+    gap: 15px; 
+    pointer-events: none;
 }
 
 /* Panel içindeki elemanlar tıklanabilir olmalı */
@@ -40,17 +40,17 @@
 /* Sol Kontrol Paneli */
 .control-sidebar { 
     left: 0; 
-    width: 300px; 
+    width: 320px; 
 }
 
 /* Sağ Akış Paneli */
 .feed-sidebar { 
     right: 0; 
-    width: var(--sidebar-width); 
+    width: 380px; 
     background: var(--bg-card); 
     border-left: 1px solid var(--border-ui); 
     backdrop-filter: blur(20px); 
-    padding: 0; 
+    padding: 0;
 }
 
 /* --- RESPONSIVE: MOBİL ÇÖZÜMÜ --- */
@@ -58,21 +58,23 @@
     .app-container { 
         display: flex; 
         flex-direction: column; 
-        height: 100vh; 
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
     }
 
     #map { 
-        flex: 1; 
-        position: relative; 
+        position: relative;
+        width: 100%;
+        height: 50vh; /* Mobilde haritaya sabit yükseklik */
+        flex-shrink: 0;
     }
 
     .sidebar { 
         position: relative; 
         width: 100%; 
         height: auto; 
-        max-height: 40vh; 
         padding: 10px; 
-        overflow-y: auto; 
         pointer-events: auto;
     }
 
@@ -81,11 +83,11 @@
         left: 0; 
         right: 0; 
         width: 100%; 
-        border: none; 
+        border: none;
+        backdrop-filter: none;
     }
 
     .global-analytics { 
         display: none; 
     }
-}
-
+} /* KRİTİK: Medya sorgusu burada kapanmalı */
