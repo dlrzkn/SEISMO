@@ -26,34 +26,32 @@ export const UIController = {
     },
 
     // 1. SOL LİSTE (Sismik Akış)
-    renderFeed(events) {
-        if (!this.els.feed) return;
-        this.els.feed.innerHTML = '';
+renderFeed(events) {
+    if (!this.els.feed) return;
+    this.els.feed.innerHTML = '';
 
-        events.forEach(eq => {
-            const node = document.createElement('div');
-            node.className = 'earthquake-node';
-            const color = this.getMagColor(eq.mag);
+    events.forEach(eq => {
+        const node = document.createElement('div');
+        node.className = 'earthquake-node';
+        const color = this.getMagColor(eq.mag);
 
-            node.innerHTML = `
-                <div class="mag-badge" style="border-color: ${color}; color: ${color};">
-                    <div class="mag-val">${parseFloat(eq.mag).toFixed(1)}</div>
-                    <div class="mag-type">${eq.magType || 'Mw'}</div>
+        node.innerHTML = `
+            <div class="mag-section" style="color: ${color}">
+                <div class="mag-value">${parseFloat(eq.mag).toFixed(1)}</div>
+                <div class="mag-type">${eq.magType}</div>
+            </div>
+            <div class="info-section">
+                <div class="place-name">${eq.place}</div>
+                <div class="meta-data">
+                    ${eq.depth.toFixed(1)} km • ${new Date(eq.time).toLocaleTimeString('tr-TR')} / ${eq.source}
                 </div>
-                <div class="node-info">
-                    <div class="node-place">${eq.place}</div>
-                    <div class="node-meta">
-                        ${eq.depth.toFixed(1)} km • ${new Date(eq.time).toLocaleTimeString('tr-TR')}
-                        <span class="source-tag-inline">/ ${eq.source}</span>
-                    </div>
-                </div>
-            `;
+            </div>
+        `;
+        node.onclick = () => window.focusEvent(eq.coordinates);
+        this.els.feed.appendChild(node);
+    });
+}
 
-            // Listeye tıklayınca haritada odaklan (main.js'deki global event)
-            node.onclick = () => window.focusEvent(eq.coordinates, 9);
-            this.els.feed.appendChild(node);
-        });
-    },
 
     // 2. BİLİMSEL ANALİZ PANELİ (Enerji ve Sığ/Derin Oranı)
     renderAnalytics(analytics) {
