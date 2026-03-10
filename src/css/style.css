@@ -191,3 +191,55 @@ body.light-mode #map { background: transparent !important; }
     border-color: var(--accent);
 }
 
+/* --- RESPONSIVE FIX (MOBİL VE TABLET UYUMU) --- */
+@media (max-width: 1024px) {
+    .app-container {
+        flex-direction: column;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    #map {
+        height: 50vh; /* Harita ekranın yarısını kaplar */
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100% !important;
+        height: auto;
+        padding: 10px;
+        pointer-events: auto;
+        left: 0;
+        right: 0;
+    }
+
+    .control-sidebar {
+        order: 2;
+    }
+
+    .feed-sidebar {
+        order: 3;
+        height: 60vh;
+        border-left: none;
+        border-top: 1px solid var(--border-ui);
+    }
+
+    .top-bar {
+        padding: 0 10px;
+        flex-wrap: wrap;
+        height: auto;
+        min-height: 54px;
+    }
+
+    .global-analytics {
+        display: none; /* Mobilde sade görünüm için */
+    }
+
+    .brand-section h1 {
+        font-size: 16px;
+    }
+}
