@@ -1,8 +1,3 @@
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
 /* --- SEISMO PRO GLOBAL DEĞİŞKENLER --- */
 :root {
     --bg-main: #0a0c10;
@@ -14,7 +9,7 @@ html, body {
     --accent-glow: rgba(0, 210, 255, 0.3);
     --danger: #ff4d4d;
     --header-height: 60px;
-    --sidebar-width: 300px;
+    --sidebar-width: 320px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -26,7 +21,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-primary);
     height: 100vh;
-    overflow: hidden; /* Masaüstü ve tablette taşma yapmasın */
+    overflow: hidden; 
 }
 
 /* --- ÜST PANEL (HEADER) --- */
@@ -80,7 +75,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    pointer-events: none;
+    pointer-events: none; /* Harita etkileşimini engellememesi için */
 }
 .sidebar > * { pointer-events: auto; }
 
@@ -92,6 +87,7 @@ body {
     border-left: 1px solid var(--border-ui);
     backdrop-filter: blur(20px);
     padding: 0;
+    pointer-events: auto; /* Liste tıklanabilir olmalı */
 }
 
 /* --- KART TASARIMLARI --- */
@@ -113,7 +109,6 @@ body {
 }
 
 /* --- FİLTRELER VE BUTONLAR --- */
-.filter-group { margin-bottom: 12px; }
 .btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 
 .filter-btn, .terminal-btn {
@@ -135,25 +130,14 @@ body {
 }
 
 /* --- DEPREM LİSTESİ (FEED) --- */
-.feed-header { padding: 15px; border-bottom: 1px solid var(--border-ui); display: flex; justify-content: space-between; }
+.feed-header { padding: 15px; border-bottom: 1px solid var(--border-ui); }
 .feed-scroll { overflow-y: auto; flex-grow: 1; padding: 10px; }
 
-.earthquake-node {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid var(--border-ui);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 10px;
-    display: grid;
-    grid-template-columns: 50px 1fr;
-    gap: 12px;
-    cursor: pointer;
-    transition: var(--transition);
-}
+/* Scrollbar Style */
+.feed-scroll::-webkit-scrollbar { width: 4px; }
+.feed-scroll::-webkit-scrollbar-thumb { background: var(--border-ui); border-radius: 10px; }
 
-.earthquake-node:hover { background: rgba(0, 210, 255, 0.08); transform: scale(1.02); }
-
-/* --- ANALİTİK GRAFİKLER --- */
+/* --- ANALİTİK --- */
 .depth-viz-container {
     height: 8px;
     background: rgba(255,255,255,0.05);
@@ -164,50 +148,13 @@ body {
 }
 .depth-bar { height: 100%; transition: width 1s ease; }
 
-/* --- MOBİL UYUMLULUK (CRITICAL) --- */
+/* --- MOBİL UYUMLULUK --- */
 @media (max-width: 992px) {
     body { overflow-y: auto; }
-    
-    .app-container {
-        flex-direction: column;
-        height: auto;
-    }
-
-    #map {
-        height: 45vh; /* Mobilde harita üstte kalsın */
-        width: 100%;
-        position: sticky;
-        top: 0;
-    }
-
-    .sidebar {
-        position: relative;
-        width: 100% !important;
-        height: auto;
-        padding: 10px;
-    }
-
-    .feed-sidebar {
-        border-left: none;
-        border-top: 1px solid var(--border-ui);
-        height: 60vh;
-    }
-
-    .top-bar { padding: 0 10px; }
-    .logo-group h1 { font-size: 16px; }
-    .global-analytics { display: none; } /* Mobilde üst barı rahatlat */
-    
-    /* Mobilde dokunmatik alanları büyüt */
-    .filter-btn { padding: 14px 5px; font-size: 12px; }
-}
-
-/* --- MAPBOX POPUP CUSTOM --- */
-.mapboxgl-popup-content {
-    background: rgba(10, 12, 16, 0.95) !important;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--accent);
-    color: #fff !important;
-    border-radius: 12px !important;
-    padding: 15px !important;
+    .app-container { flex-direction: column; height: auto; }
+    #map { height: 50vh; width: 100%; position: sticky; top: 0; }
+    .sidebar { position: relative; width: 100% !important; height: auto; padding: 10px; pointer-events: auto; }
+    .feed-sidebar { border-left: none; border-top: 1px solid var(--border-ui); height: 60vh; }
+    .global-analytics { display: none; }
 }
 
