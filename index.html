@@ -6,8 +6,9 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="src/css/style.css">
 </head>
 <body>
 
@@ -15,17 +16,24 @@
         <div class="brand-section">
             <div class="status-indicator">
                 <div class="pulse-dot"></div>
-                <span style="font-size: 10px; font-weight: 800;">LIVE</span>
+                <span class="live-tag">LIVE</span>
             </div>
             <div class="logo-group">
                 <h1>SEISMO<span>PRO</span></h1>
-                <small class="sub-logo">Sismolojik Analiz Terminali</small>
+                <small class="sub-logo">GLOBAL SEISMIC MONITOR</small>
             </div>
         </div>
 
         <div class="global-analytics">
-            <span class="stat-label">Σ ENERJİ:</span>
-            <span id="total-energy" class="stat-value">0.00 TJ</span>
+            <div class="stat-item">
+                <span class="stat-label">Σ ENERJİ:</span>
+                <span id="total-energy" class="stat-value">0.00 TJ</span>
+            </div>
+            <div class="stat-item separator"></div>
+            <div class="stat-item">
+                <span class="stat-label">DURUM:</span>
+                <span id="connection-status" class="stat-value">ONLINE</span>
+            </div>
         </div>
 
         <div class="system-meta">
@@ -38,11 +46,12 @@
 
         <aside class="sidebar control-sidebar">
             <div class="glass-card">
-                <h3>Sismik Filtreler</h3>
+                <h3>SİSMİK FİLTRELER</h3>
                 <div class="filter-group">
-                    <label style="font-size: 10px; color: var(--text-secondary);">Eşik Değer: <span id="mag-value">0.0 Mw</span></label>
-                    <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0" style="width: 100%;">
+                    <label>EŞİK DEĞER: <span id="mag-value">0.0 Mw</span></label>
+                    <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0">
                 </div>
+                
                 <div class="filter-group">
                     <div class="btn-grid">
                         <button class="filter-btn" data-time="hour">1S</button>
@@ -50,37 +59,32 @@
                         <button class="filter-btn" data-time="week">7G</button>
                     </div>
                 </div>
+
                 <div class="btn-grid">
-                    <button class="filter-btn active" data-depth="all">Tümü</button>
-                    <button class="filter-btn" data-depth="shallow">Sığ</button>
-                    <button class="filter-btn" data-depth="deep">Derin</button>
+                    <button class="filter-btn active" data-depth="all">TÜMÜ</button>
+                    <button class="filter-btn" data-depth="shallow">SIĞ</button>
+                    <button class="filter-btn" data-depth="deep">DERİN</button>
                 </div>
             </div>
 
             <div class="glass-card">
-                <h3>Sistem</h3>
-                <button id="spin-btn" class="terminal-btn" style="width: 100%;">YÖRÜNGE: PASİF</button>
+                <h3>OTOMASYON</h3>
+                <button id="rotation-toggle" class="terminal-btn">YÖRÜNGE: AKTİF</button>
             </div>
         </aside>
 
         <aside class="sidebar feed-sidebar">
             <div class="feed-header">
-                <div><span id="event-count" style="font-weight: 800; color: var(--accent);">0</span> DEPREM</div>
+                <div class="event-counter"><span id="event-count">0</span> OLAY TESPİT EDİLDİ</div>
             </div>
-            <div id="earthquake-feed" class="feed-scroll"></div>
+            <div id="earthquake-feed" class="feed-scroll custom-scrollbar">
+                </div>
         </aside>
     </main>
 
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
     
-    <script type="module" src="src/scripts/main.js"></script>
+    <script type="module" src="src/js/main.js"></script>
 
-    <script>
-        // Lejand aç kapa basit mantık (HTML içinde kalabilir)
-        function toggleLegend() {
-            const content = document.getElementById('legend-content');
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        }
-    </script>
 </body>
 </html>
