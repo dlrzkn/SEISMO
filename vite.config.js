@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  base: './', // GitHub Pages için yolların doğru çözümlenmesini sağlar
+  // GitHub Pages için base path ayarı
+  base: './', 
   build: {
-    outDir: 'dist',
     rollupOptions: {
       input: {
-        main: './index.html' // Dosyanın ana dizinde olduğunu teyit eder
+        // Giriş noktasının ana dizindeki index.html olduğunu kesinleştiriyoruz
+        main: './index.html' 
       }
     }
   }
