@@ -2,54 +2,85 @@
 <html lang="tr">
 <head>
     <meta charset="utf-8">
-    <title>Sismik İzleme Platformu v2.0</title>
+    <title>SeismoPro | Sismolojik Analiz Terminali</title>
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
-    
-    <link rel="stylesheet" href="src/styles/main.css">
-    <link rel="stylesheet" href="src/styles/components/map.css">
-    <link rel="stylesheet" href="src/styles/components/controls.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header class="ui-header">
-        <div class="logo">Sismik İzleme</div>
-        <div class="controls">
-            <button id="spin-btn" class="btn-toggle">Otomatik Dönüş: KAPALI</button>
-            
-            <select id="time-filter" class="time-select">
-                <option value="7">Son 7 Gün</option>
-                <option value="3">Son 3 Gün</option>
-                <option value="1">Son 24 Saat</option>
-            </select>
+    <header class="top-bar">
+        <div class="brand-section">
+            <div class="status-indicator">
+                <div class="pulse-dot"></div>
+                <span style="font-size: 10px; font-weight: 800;">LIVE</span>
+            </div>
+            <div class="logo-group">
+                <h1>SEISMO<span>PRO</span></h1>
+                <small class="sub-logo">Sismolojik Analiz Terminali</small>
+            </div>
+        </div>
+
+        <div class="global-analytics">
+            <span class="stat-label">Σ ENERJİ:</span>
+            <span id="total-energy" class="stat-value">0.00 TJ</span>
+        </div>
+
+        <div class="system-meta">
+            <div id="clock" class="mono-clock">00:00:00</div>
         </div>
     </header>
 
-    <main id="map"></main>
+    <main class="app-container">
+        <div id="map"></div>
 
-    <aside class="legend" id="legend">
-        <div class="legend-header" onclick="toggleLegend()">
-            <h4>Mw Ölçeği (24s)</h4>
-            <span id="legend-arrow">▼</span>
-        </div>
-        <div id="legend-content" class="legend-items">
-            <div class="legend-row"><span class="dot color-micro"></span> M < 3.0</div>
-            <div class="legend-row"><span class="dot color-small"></span> M 3.0 - 3.9</div>
-            <div class="legend-row"><span class="dot color-light"></span> M 4.0 - 4.9</div>
-            <div class="legend-row"><span class="dot color-moderate"></span> M 5.0 - 5.9</div>
-            <div class="legend-row"><span class="dot color-strong"></span> M 6.0 - 7.9</div>
-            <div class="legend-row"><span class="dot color-mega"></span> M > 8.0</div>
-            <div class="legend-row fault-line"><span class="line color-fault"></span> Plaka Sınırları</div>
-        </div>
-    </aside>
+        <aside class="sidebar control-sidebar">
+            <div class="glass-card">
+                <h3>Sismik Filtreler</h3>
+                <div class="filter-group">
+                    <label style="font-size: 10px; color: var(--text-secondary);">Eşik Değer: <span id="mag-value">0.0 Mw</span></label>
+                    <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0" style="width: 100%;">
+                </div>
+                <div class="filter-group">
+                    <div class="btn-grid">
+                        <button class="filter-btn" data-time="hour">1S</button>
+                        <button class="filter-btn active" data-time="day">24S</button>
+                        <button class="filter-btn" data-time="week">7G</button>
+                    </div>
+                </div>
+                <div class="btn-grid">
+                    <button class="filter-btn active" data-depth="all">Tümü</button>
+                    <button class="filter-btn" data-depth="shallow">Sığ</button>
+                    <button class="filter-btn" data-depth="deep">Derin</button>
+                </div>
+            </div>
+
+            <div class="glass-card">
+                <h3>Sistem</h3>
+                <button id="spin-btn" class="terminal-btn" style="width: 100%;">YÖRÜNGE: PASİF</button>
+            </div>
+        </aside>
+
+        <aside class="sidebar feed-sidebar">
+            <div class="feed-header">
+                <div><span id="event-count" style="font-weight: 800; color: var(--accent);">0</span> DEPREM</div>
+            </div>
+            <div id="earthquake-feed" class="feed-scroll"></div>
+        </aside>
+    </main>
 
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+    
+    <script type="module" src="src/scripts/main.js"></script>
 
-    <script src="src/scripts/services/earthquake.js"></script>
-    <script src="src/scripts/components/map-engine.js"></script>
-    <script src="src/scripts/components/ui-controller.js"></script>
-    <script src="src/scripts/main.js" defer></script>
-
+    <script>
+        // Lejand aç kapa basit mantık (HTML içinde kalabilir)
+        function toggleLegend() {
+            const content = document.getElementById('legend-content');
+            content.style.display = content.style.display === 'none' ? 'block' : 'none';
+        }
+    </script>
 </body>
 </html>
