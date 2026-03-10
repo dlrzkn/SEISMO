@@ -44,41 +44,42 @@ export const EarthquakeService = {
             }))
         };
     },
-
-    normalize(data, source) {
-        const rawFeatures = data.features || (Array.isArray(data) ? data : []);
+normalize(data, source) {
+    // Veri kaynağına göre özellikler listesini al (bazı servisler direkt dizi döner)
+    const rawFeatures = data.features || (Array.isArray(data) ? data : []);
+    
+    return rawFeatures.map(f => {
+        const p = f.properties || f;
+        const geom = f.geometry || {};
         
-        return rawFeatures.map(f => {
-            const p = f.properties || f;
-            const geom = f.geometry || {};
-            
-            // Sismik veri kaynaklarında koordinat sırası her zaman [lon, lat, depth] olmayabilir
-            // Güvenli koordinat ayrıştırma
-            let lon = 0, lat = 0, depth = 0;
-            if (geom.coordinates) {
-                [lon, lat, depth] = geom.coordinates;
-            } else {
-                lon = p.longitude || p.lon || 0;
-                lat = p.latitude || p.lat || 0;
-                depth = p.depth || 0;
-            }
+        // Koordinat ayrıştırma
+        let lon = 0, lat = 0, depth = 0;
+        if (geom.coordinates) {
+            [lon, lat, depth] = geom.coordinates;
+        } else {
+            lon = p.longitude || p.lon || 0;
+            lat = p.latitude || p.lat || 0;
+            depth = p.depth || 0;
+        }
 
-            // Jeofiziksel büyüklük tipi (Mw, Ml vb.) - Bilimsel camia için önemli
-            const magType = p.magType || p.magnitudeType || 'U';
+        const magType = p.magType || p.magnitudeType || 'U';
 
-            return {
-                id: String(p.unid || p.ids || p.id || `${source}-${p.time}-${lon}`),
-                mag: parseFloat(p.mag || p.magnitude || 0).toFixed(1),
-                magType: magType.toUpperCase(),
-                depth: parseFloat(Math.abs(depth).toFixed(2)),
-                place: (p.place || p.region || p.flynn_region || "BÖLGE TANIMLANAMADI").toUpperCase().trim(),
-                time: p.time ? new Error(p.time).getTime() : (p.m_time ? new Date(p.m_time).getTime() : Date.now()),
-                source: source,
-                coordinates: [parseFloat(lon), parseFloat(lat)],
-                url: p.url || (p.uri ? p.uri : "#")
-            };
-        });
-    },
+        return {
+            id: String(p.unid || p.ids || p.id || `${source}-${p.time}-${lon}`),
+            mag: parseFloat(p.mag || p.magnitude || 0).toFixed(1),
+            magType: magType.toUpperCase(),
+            depth: parseFloat(Math.abs(depth).toFixed(2)),
+            place: (p.place || p.region || p.flynn_region || "BÖLGE TANIMLANAMADI").toUpperCase().trim(),
+            // HATALI KISIM DÜZELTİLDİ: new Error -> new Date
+            time: p.time ? new Date(p.time).getTime() : (p.m_time ? new Date(p.m_time).getTime() : Date.now()),
+            source: source,
+            coordinates: [parseFloat(lon), parseFloat(lat)],
+            url: p.url || (p.uri ? p.uri : "#")
+        };
+    });
+},
+
+
 
     getHaversineDistance(coords1, coords2) {
         const R = 6371;
