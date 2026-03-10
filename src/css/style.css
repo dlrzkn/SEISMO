@@ -191,55 +191,47 @@ body.light-mode #map { background: transparent !important; }
     border-color: var(--accent);
 }
 
-/* --- RESPONSIVE FIX (MOBİL VE TABLET UYUMU) --- */
+/* --- MOBİL İÇİN PANEL ERİŞİM DÜZENLEMESİ --- */
 @media (max-width: 1024px) {
     .app-container {
+        display: flex;
         flex-direction: column;
-        height: auto;
+        height: calc(100vh - var(--header-height)); /* Ekranı aşmasın */
         overflow-y: auto;
     }
 
     #map {
-        height: 50vh; /* Harita ekranın yarısını kaplar */
+        height: 40vh; /* Haritayı biraz küçültelim ki paneller yukarı çıksın */
         width: 100%;
         position: sticky;
         top: 0;
-        z-index: 5;
+        flex-shrink: 0;
     }
 
     .sidebar {
-        position: relative;
+        position: relative; /* Absolute'dan kurtarıyoruz */
         width: 100% !important;
         height: auto;
-        padding: 10px;
+        padding: 15px;
         pointer-events: auto;
         left: 0;
         right: 0;
     }
 
     .control-sidebar {
-        order: 2;
+        order: 2; /* Filtreler haritadan hemen sonra */
     }
 
     .feed-sidebar {
-        order: 3;
-        height: 60vh;
+        order: 3; /* Deprem listesi en altta */
+        background: var(--bg-card);
         border-left: none;
         border-top: 1px solid var(--border-ui);
+        height: 50vh; /* Liste için yeterli alan */
     }
 
-    .top-bar {
-        padding: 0 10px;
-        flex-wrap: wrap;
-        height: auto;
-        min-height: 54px;
-    }
-
-    .global-analytics {
-        display: none; /* Mobilde sade görünüm için */
-    }
-
-    .brand-section h1 {
-        font-size: 16px;
+    /* Mobilde kartların birbirine çok yapışmaması için */
+    .glass-card {
+        margin-bottom: 10px;
     }
 }
