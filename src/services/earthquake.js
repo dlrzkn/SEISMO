@@ -1,5 +1,4 @@
 // SEISMO/src/services/earthquake.js
-
 export const EarthquakeService = {
     endpoints: [
         { id: 'USGS', url: 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson' },
@@ -7,18 +6,20 @@ export const EarthquakeService = {
         { id: 'GFZ', url: 'https://geofon.gfz-potsdam.de/eqinfo/list.php?fmt=geojson' }
     ],
 
-    async fetchAll() {
+    async fetchAndProcess() {
         const results = await Promise.allSettled(this.endpoints.map(e => fetch(e.url).then(r => r.json())));
         let allFeatures = [];
+        
         results.forEach((res, index) => {
             if (res.status === 'fulfilled') {
                 allFeatures.push(...this.normalize(res.value, this.endpoints[index].id));
             }
         });
+
         return this.deduplicate(allFeatures);
     },
 
-    getDistance(coords1, coords2) {
+    getHaversineDistance(coords1, coords2) {
         const R = 6371;
         const dLat = (coords2[1] - coords1[1]) * Math.PI / 180;
         const dLon = (coords2[0] - coords1[0]) * Math.PI / 180;
@@ -32,8 +33,8 @@ export const EarthquakeService = {
         sorted.forEach(current => {
             const isDup = unique.some(ex => {
                 const tDiff = Math.abs(current.time - ex.time);
-                const sDiff = this.getDistance(current.coordinates, ex.coordinates);
-                return tDiff < 60000 && sDiff < 50; // 1dk ve 50km sınırı
+                const sDiff = this.getHaversineDistance(current.coordinates, ex.coordinates);
+                return tDiff < 60000 && sDiff < 50; 
             });
             if (!isDup) unique.push(current);
         });
@@ -41,6 +42,6 @@ export const EarthquakeService = {
     },
 
     normalize(data, source) {
-        // ... (Senin orijinal normalize fonksiyonun buraya gelecek)
+        // (Senin paylaştığın normalize fonksiyonunun birebir aynısı buraya gelecek)
     }
 };
