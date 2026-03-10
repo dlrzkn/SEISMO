@@ -1,15 +1,15 @@
-// vite.config.js
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  root: 'src',
-  base: './',
+  // Root varsayılan olarak zaten ana dizindir, 
+  // ama açıkça belirtmek çakışmaları önler.
+  root: './', 
   build: {
-    outDir: '../dist',
-    emptyOutDir: true,
-  },
-  server: {
-    open: true,
-    port: 5173,
-  },
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: './index.html' // Burada 'src/index.html' yazıyorsa hatanın kaynağı budur.
+      }
+    }
+  }
 });
