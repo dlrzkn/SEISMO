@@ -1,82 +1,58 @@
-// SEISMO/src/core/map-engine.js
 export const MapEngine = {
+    map: null,
+
     init(config) {
         mapboxgl.accessToken = config.token;
-        const map = new mapboxgl.Map({
+        this.map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-streets-v12',
+            style: 'mapbox://styles/mapbox/dark-v11', // Bilimsel analiz için koyu tema daha iyidir
             center: [35, 39],
-            zoom: 2.5,
+            zoom: 3,
             projection: 'globe'
         });
 
-        map.on('style.load', () => {
-            this.setupAtmosphere(map);
-            this.initSources(map);
-            this.initLayers(map);
-        });
+        // Responsive Desteği: Tablet döndürüldüğünde haritayı yeniden boyutlandır
+        window.addEventListener('resize', () => this.map.resize());
 
-        return map;
-    },
-
-    setupAtmosphere(map) {
-        map.setFog({
-            'range': [0.5, 10],
-            'color': '#0a0c10',
-            'high-color': '#161c24',
-            'space-color': '#000000',
-            'star-intensity': 0.2
+        return new Promise((resolve) => {
+            this.map.on('style.load', () => {
+                this.setupAtmosphere(this.map);
+                this.initSources(this.map);
+                this.initLayers(this.map);
+                resolve(this.map);
+            });
         });
     },
 
-    initSources(map) {
-        // Senin orijinal 'earthquakes' kaynağın
-        map.addSource('earthquakes', { 
-            type: 'geojson', 
-            data: { type: 'FeatureCollection', features: [] } 
-        });
-        // Plaka sınırları
-        map.addSource('plates', { 
-            type: 'geojson', 
-            data: 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json' 
-        });
-    },
-
+    // UI/UX İyileştirmesi: Mag değerine göre dinamik büyüklük
     initLayers(map) {
-        // KATMAN 1: Fay Hatları (En altta)
+        // Fay hatları (Scientific Layer)
         map.addLayer({ 
             id: 'plates-layer', type: 'line', source: 'plates', 
-            paint: { 'line-color': '#ff4d4d', 'line-width': 1, 'line-dasharray': [4, 3] } 
+            paint: { 'line-color': '#ff4d4d', 'line-width': 0.8, 'line-opacity': 0.5 } 
         });
 
-        // KATMAN 2: Isı Haritası (Ortada)
-        map.addLayer({
-            id: 'quakes-heat', type: 'heatmap', source: 'earthquakes',
-            maxzoom: 9,
-            paint: {
-                'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 6, 1],
-                'heatmap-color': [
-                    'interpolate', ['linear'], ['heatmap-density'],
-                    0, 'rgba(33,102,172,0)', 0.2, 'rgb(103,169,207)', 0.4, 'rgb(209,229,240)',
-                    0.6, '#f1c40f', 0.8, '#e67e22', 1, '#e74c3c'
-                ],
-                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
-                'heatmap-opacity': 0.6
-            }
-        });
-
-        // KATMAN 3: Deprem Noktaları (En üstte - Tıklanabilir)
+        // Deprem Noktaları (Logaritmik Ölçeklendirme)
         map.addLayer({
             id: 'earthquake-points', type: 'circle', source: 'earthquakes',
             paint: {
-                'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 6, 15, 9, 45],
-                'circle-color': ['interpolate', ['linear'], ['get', 'mag'], 3, '#2ecc71', 5, '#f1c40f', 7, '#e67e22', 8, '#c0392b'],
-                'circle-stroke-width': 1.5,
-                'circle-stroke-color': '#fff',
-                'circle-opacity': 0.8
+                // Daha profesyonel bir zoom-radius dengesi
+                'circle-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    2, ['interpolate', ['linear'], ['get', 'mag'], 2, 2, 8, 15],
+                    10, ['interpolate', ['linear'], ['get', 'mag'], 2, 5, 8, 60]
+                ],
+                'circle-color': [
+                    'step', ['get', 'mag'],
+                    '#5efc82', 4.0, // Yeşil (Minor)
+                    '#fceb5e', 5.5, // Sarı (Moderate)
+                    '#ff9100', 7.0, // Turuncu (Strong)
+                    '#ff1744'       // Kırmızı (Major)
+                ],
+                'circle-stroke-width': 1,
+                'circle-stroke-color': '#ffffff',
+                'circle-opacity': 0.7
             }
         });
     }
 };
-
-
