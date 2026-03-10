@@ -3,19 +3,25 @@ export const UIController = {
         feed: document.getElementById('earthquake-feed'),
         count: document.getElementById('event-count'),
         energy: document.getElementById('total-energy'),
+        energyTimerange: document.getElementById('energy-timerange'),
         analysis: document.getElementById('depth-analysis'),
         magSlider: document.getElementById('mag-slider'),
         magValue: document.getElementById('mag-value'),
-        status: document.getElementById('connection-status')
+        status: document.getElementById('connection-status'),
+        clock: document.getElementById('clock')
     },
 
     renderAll(appState) {
         this.renderFeed(appState.filteredEvents);
         this.renderAnalytics(appState.analytics);
         if (this.els.count) this.els.count.innerText = appState.filteredEvents.length;
+        if (this.els.energyTimerange) {
+            const labels = { 'hour': '1S', 'day': '24S', 'week': '7G' };
+            this.els.energyTimerange.innerText = labels[appState.filters.timeRange];
+        }
     },
 
-    // 1. SAĞ LİSTE (Görseldeki Badge Yapısı)
+    // SAĞ LİSTE: Senin o sevdiğin dikey badge tasarımı
     renderFeed(events) {
         if (!this.els.feed) return;
         this.els.feed.innerHTML = '';
@@ -25,17 +31,18 @@ export const UIController = {
             node.className = 'earthquake-node';
             const color = this.getMagColor(eq.mag);
 
-            // Büyüklüğün sol tarafta dikey durduğu o şık yapı
             node.innerHTML = `
-                <div class="mag-section" style="border-left: 3px solid ${color};">
-                    <div class="mag-value" style="color: ${color}">${parseFloat(eq.mag).toFixed(1)}</div>
-                    <div class="mag-type">${eq.magType || 'MW'}</div>
+                <div class="source-tag">${eq.source}</div>
+                <div class="mag-block" style="border-left: 3px solid ${color}; padding-left: 10px;">
+                    <div style="color: ${color}; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 18px;">
+                        ${parseFloat(eq.mag).toFixed(1)}
+                    </div>
+                    <div style="font-size: 8px; color: var(--text-secondary);">${eq.magType || 'MW'}</div>
                 </div>
-                <div class="info-section">
-                    <div class="place-name">${eq.place}</div>
-                    <div class="meta-data">
+                <div class="node-info">
+                    <div class="node-place" style="font-size: 12px; font-weight: 600; color: #fff;">${eq.place}</div>
+                    <div class="node-meta" style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">
                         ${parseFloat(eq.depth).toFixed(1)} km • ${new Date(eq.time).toLocaleTimeString('tr-TR')}
-                        <span class="source-tag">/ ${eq.source}</span>
                     </div>
                 </div>
             `;
@@ -45,20 +52,20 @@ export const UIController = {
         });
     },
 
-    // 2. SOL ALT ANALİZ (Renkli Derinlik Barı)
+    // DERİNLİK ANALİZİ: Kırmızı/Mavi Bar Tasarımı
     renderAnalytics(analytics) {
         if (this.els.energy) this.els.energy.innerText = `${analytics.totalEnergyTJ} TJ`;
         
         if (this.els.analysis) {
-            const ratio = analytics.shallowRatio;
+            const ratio = parseFloat(analytics.shallowRatio);
             this.els.analysis.innerHTML = `
-                <div class="analysis-header" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; font-weight: 700;">
+                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; font-weight: 700;">
                     <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
                     <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
                 </div>
-                <div class="depth-viz-container" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; display: flex;">
-                    <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; height: 100%; transition: width 0.5s ease;"></div>
-                    <div class="depth-bar-deep" style="width: ${100 - ratio}%; background: #00d2ff; height: 100%; transition: width 0.5s ease;"></div>
+                <div class="depth-viz-container">
+                    <div class="depth-bar" style="width: ${ratio}%; background: #ff4d4d;"></div>
+                    <div class="depth-bar" style="width: ${100 - ratio}%; background: #00d2ff;"></div>
                 </div>
             `;
         }
@@ -69,7 +76,7 @@ export const UIController = {
     },
 
     updateStatus(text) {
-        if (this.els.status) this.els.status.innerText = text;
+        if (this.els.status) this.els.status.innerText = `SİNYAL: ${text}`;
     },
 
     updateActiveButtons(clickedBtn) {
@@ -81,9 +88,9 @@ export const UIController = {
     },
 
     getMagColor(mag) {
-        if (mag < 3) return '#00d2ff'; // NASA Blue
-        if (mag < 5) return '#fceb5e'; // Moderate
-        if (mag < 7) return '#ff9100'; // Strong
-        return '#ff4d4d';             // Major
+        if (mag < 3) return '#00d2ff';
+        if (mag < 5) return '#fceb5e';
+        if (mag < 7) return '#ff9100';
+        return '#ff4d4d';
     }
 };
