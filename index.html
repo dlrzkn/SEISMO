@@ -1,90 +1,78 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>SeismoPro | Sismolojik Analiz Terminali</title>
-    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-    
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="src/css/style.css">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet' />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/css/style.css">
 </head>
-<body>
-
+<body class="light-mode"> 
     <header class="top-bar">
         <div class="brand-section">
             <div class="status-indicator">
                 <div class="pulse-dot"></div>
-                <span class="live-tag">LIVE</span>
+                <span class="live-text">LIVE</span>
             </div>
             <div class="logo-group">
                 <h1>SEISMO<span>PRO</span></h1>
-                <small class="sub-logo">GLOBAL SEISMIC MONITOR</small>
+                <small class="sub-logo">Sismolojik Analiz Terminali</small>
             </div>
         </div>
-
         <div class="global-analytics">
-            <div class="stat-item">
-                <span class="stat-label">Σ ENERJİ:</span>
+            <div class="stat-node">
+                <span class="stat-label">Σ ENERJİ (<span id="energy-timerange">24S</span>):</span>
                 <span id="total-energy" class="stat-value">0.00 TJ</span>
             </div>
-            <div class="stat-item separator"></div>
-            <div class="stat-item">
-                <span class="stat-label">DURUM:</span>
-                <span id="connection-status" class="stat-value">ONLINE</span>
-            </div>
         </div>
-
         <div class="system-meta">
+            <div id="connection-status" class="status-tag">SİNYAL: GÜÇLÜ</div>
             <div id="clock" class="mono-clock">00:00:00</div>
         </div>
     </header>
 
     <main class="app-container">
-        <div id="map"></div>
-
+        <div id="map"></div> 
         <aside class="sidebar control-sidebar">
             <div class="glass-card">
-                <h3>SİSMİK FİLTRELER</h3>
+                <h3>Sismik Filtreler</h3>
                 <div class="filter-group">
-                    <label>EŞİK DEĞER: <span id="mag-value">0.0 Mw</span></label>
+                    <label>Eşik Değer (Mw): <span id="mag-value">0.0 Mw</span></label>
                     <input type="range" id="mag-slider" min="0" max="9" step="0.1" value="0">
                 </div>
-                
                 <div class="filter-group">
+                    <label>Zaman Penceresi</label>
                     <div class="btn-grid">
                         <button class="filter-btn" data-time="hour">1S</button>
                         <button class="filter-btn active" data-time="day">24S</button>
                         <button class="filter-btn" data-time="week">7G</button>
                     </div>
                 </div>
-
-                <div class="btn-grid">
-                    <button class="filter-btn active" data-depth="all">TÜMÜ</button>
-                    <button class="filter-btn" data-depth="shallow">SIĞ</button>
-                    <button class="filter-btn" data-depth="deep">DERİN</button>
+                <div class="filter-group">
+                    <label>Odak Derinliği</label>
+                    <div class="btn-grid">
+                        <button class="filter-btn active" data-depth="all">Tümü</button>
+                        <button class="filter-btn" data-depth="shallow">Sığ</button>
+                        <button class="filter-btn" data-depth="deep">Derin</button>
+                    </div>
                 </div>
             </div>
-
-            <div class="glass-card">
-                <h3>OTOMASYON</h3>
-                <button id="rotation-toggle" class="terminal-btn">YÖRÜNGE: AKTİF</button>
+            <div class="glass-card stats-card">
+                <h3>Derinlik Dağılım Analizi</h3>
+                <div id="depth-analysis" class="analysis-box">Veriler işleniyor...</div>
             </div>
         </aside>
 
         <aside class="sidebar feed-sidebar">
             <div class="feed-header">
-                <div class="event-counter"><span id="event-count">0</span> OLAY TESPİT EDİLDİ</div>
+                <div class="count-box"><span id="event-count">0</span> <small>DEPREM</small></div>
             </div>
-            <div id="earthquake-feed" class="feed-scroll custom-scrollbar">
-                </div>
+            <div id="earthquake-feed" class="feed-scroll"></div>
         </aside>
     </main>
 
-    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
-    
-    <script type="module" src="src/js/main.js"></script>
-
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+    <script type="module" src="/src/js/main.js"></script>
 </body>
 </html>
