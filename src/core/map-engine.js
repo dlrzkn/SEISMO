@@ -1,5 +1,4 @@
 // SEISMO/src/core/map-engine.js
-
 export const MapEngine = {
     init(config) {
         mapboxgl.accessToken = config.token;
@@ -8,8 +7,7 @@ export const MapEngine = {
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
             center: [35, 39],
             zoom: 2.5,
-            projection: 'globe',
-            antialias: true
+            projection: 'globe'
         });
 
         map.on('style.load', () => {
@@ -32,11 +30,12 @@ export const MapEngine = {
     },
 
     initSources(map) {
+        // Senin orijinal 'earthquakes' kaynağın
         map.addSource('earthquakes', { 
             type: 'geojson', 
             data: { type: 'FeatureCollection', features: [] } 
         });
-        
+        // Plaka sınırları
         map.addSource('plates', { 
             type: 'geojson', 
             data: 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json' 
@@ -44,11 +43,15 @@ export const MapEngine = {
     },
 
     initLayers(map) {
-        // Isı Haritası (Heatmap) - Yeni ekliyoruz
+        // KATMAN 1: Fay Hatları (En altta)
+        map.addLayer({ 
+            id: 'plates-layer', type: 'line', source: 'plates', 
+            paint: { 'line-color': '#ff4d4d', 'line-width': 1, 'line-dasharray': [4, 3] } 
+        });
+
+        // KATMAN 2: Isı Haritası (Ortada)
         map.addLayer({
-            id: 'quakes-heat',
-            type: 'heatmap',
-            source: 'earthquakes',
+            id: 'quakes-heat', type: 'heatmap', source: 'earthquakes',
             maxzoom: 9,
             paint: {
                 'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 6, 1],
@@ -62,11 +65,9 @@ export const MapEngine = {
             }
         });
 
-        // Nokta Katmanı (Senin orijinal ayarların)
+        // KATMAN 3: Deprem Noktaları (En üstte - Tıklanabilir)
         map.addLayer({
-            id: 'earthquake-points',
-            type: 'circle',
-            source: 'earthquakes',
+            id: 'earthquake-points', type: 'circle', source: 'earthquakes',
             paint: {
                 'circle-radius': ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 6, 15, 9, 45],
                 'circle-color': ['interpolate', ['linear'], ['get', 'mag'], 3, '#2ecc71', 5, '#f1c40f', 7, '#e67e22', 8, '#c0392b'],
@@ -75,14 +76,7 @@ export const MapEngine = {
                 'circle-opacity': 0.8
             }
         });
-
-        // Fay Hatları
-        map.addLayer({ 
-            id: 'plates-layer', 
-            type: 'line', 
-            source: 'plates', 
-            paint: { 'line-color': '#ff4d4d', 'line-width': 1, 'line-dasharray': [4, 3] } 
-        });
     }
 };
+
 
