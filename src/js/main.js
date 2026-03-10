@@ -1,27 +1,24 @@
 // SEISMO/src/js/main.js
 import { MapEngine } from '../core/map-engine.js';
 import { EarthquakeService } from '../services/earthquake.js';
-// import { UIController } from './ui.js'; 
+import { UIController } from './ui.js';
 
-const token = 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q';
+const config = {
+    token: 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q'
+};
 
-const map = MapEngine.init({ token });
+// 1. Haritayı Başlat
+const map = MapEngine.init(config);
 
 map.on('load', async () => {
-    // 1. Veriyi çek
-    const rawData = await EarthquakeService.fetchAndProcess();
+    // 2. Verileri Çek
+    const data = await EarthquakeService.fetchAndProcess();
     
-    // 2. Haritayı güncelle (Hem Isı Haritası hem Noktalar otomatik güncellenir)
-    const geojson = { 
-        type: 'FeatureCollection', 
-        features: rawData.map(ev => ({
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: ev.coordinates },
-            properties: { ...ev }
-        }))
-    };
-    map.getSource('earthquakes').setData(geojson);
+    // 3. Arayüzü Başlat
+    UIController.init(map, data);
 
-    // 3. UI Bileşenlerini başlat (Gelecek adımda yapacağız)
-    // UIController.init(map, rawData);
+    // 4. Global erişim için (Listeden tıklayınca haritaya gitmesi için)
+    window.focusEvent = (coords) => {
+        map.flyTo({ center: coords, zoom: 8, duration: 2000, essential: true });
+    };
 });
