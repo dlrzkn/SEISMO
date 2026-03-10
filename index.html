@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8">
+    <title>Sismik İzleme Platformu v2.0</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/components/map.css">
+    <link rel="stylesheet" href="src/styles/components/controls.css">
+</head>
+<body>
+
+    <header class="ui-header">
+        <div class="logo">Sismik İzleme</div>
+        <div class="controls">
+            <button id="spin-btn" class="btn-toggle">Otomatik Dönüş: KAPALI</button>
+            
+            <select id="time-filter" class="time-select">
+                <option value="7">Son 7 Gün</option>
+                <option value="3">Son 3 Gün</option>
+                <option value="1">Son 24 Saat</option>
+            </select>
+        </div>
+    </header>
+
+    <main id="map"></main>
+
+    <aside class="legend" id="legend">
+        <div class="legend-header" onclick="toggleLegend()">
+            <h4>Mw Ölçeği (24s)</h4>
+            <span id="legend-arrow">▼</span>
+        </div>
+        <div id="legend-content" class="legend-items">
+            <div class="legend-row"><span class="dot color-micro"></span> M < 3.0</div>
+            <div class="legend-row"><span class="dot color-small"></span> M 3.0 - 3.9</div>
+            <div class="legend-row"><span class="dot color-light"></span> M 4.0 - 4.9</div>
+            <div class="legend-row"><span class="dot color-moderate"></span> M 5.0 - 5.9</div>
+            <div class="legend-row"><span class="dot color-strong"></span> M 6.0 - 7.9</div>
+            <div class="legend-row"><span class="dot color-mega"></span> M > 8.0</div>
+            <div class="legend-row fault-line"><span class="line color-fault"></span> Plaka Sınırları</div>
+        </div>
+    </aside>
+
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
+
+    <script src="src/scripts/services/earthquake.js"></script>
+    <script src="src/scripts/components/map-engine.js"></script>
+    <script src="src/scripts/components/ui-controller.js"></script>
+    <script src="src/scripts/main.js" defer></script>
+
+</body>
+</html>
