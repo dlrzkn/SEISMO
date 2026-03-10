@@ -1,90 +1,139 @@
 import { MapEngine } from '../core/map-engine.js';
 import { EarthquakeService } from '../services/earthquake.js';
-import { UIController } from './ui.js'; // Görseldeki dizine göre güncelledim
+import { UIController } from './ui.js';
 
 const App = {
-    // 1. Durum Yönetimi (Referans kodundan gelen güç)
+    // 1. UYGULAMA DURUMU (STATE)
     state: {
         map: null,
-        rawGeoJSON: null,
+        rawEvents: [],      // Ham veri
+        filteredEvents: [], // Filtrelenmiş veri
         filters: {
             minMag: 0,
-            depthLimit: 70, // Sığ/Derin sınırı (km)
-            timeRange: 'day'
+            timeRange: 'day',
+            depthFilter: 'all'
         },
-        analytics: {
-            totalEnergyTJ: 0,
-            shallowRatio: 0
+        settings: {
+            isRotating: true,
+            shallowLimit: 70
         }
     },
 
+    // 2. BAŞLATICI
     async init() {
+        console.log("SeismoPro Başlatılıyor...");
+        
         const config = {
             token: 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q'
         };
 
-        // 2. Haritayı Başlat ve Yüklenmesini Bekle
+        // Haritayı yükle ve state'e kaydet
         this.state.map = await MapEngine.init(config);
 
-        // 3. İlk Veri Döngüsünü Başlat
-        await this.refreshData();
+        // Olay dinleyicileri (Slider, Butonlar)
+        this.attachEventListeners();
 
-        // 4. Periyodik Güncelleme (Referans: refreshInterval)
-        setInterval(() => this.refreshData(), 120000); // 2 dakikada bir
+        // İlk veri çekme döngüsü
+        await this.dataCycle();
 
-        // 5. UI Dinleyicilerini Bağla
-        this.setupEventListeners();
+        // Periyodik güncelleme (Her 2 dakikada bir)
+        setInterval(() => this.dataCycle(), 120000);
+
+        // Saat döngüsü
+        this.startClock();
     },
 
-    async refreshData() {
-        console.log("Sismik veriler taranıyor...");
-        
-        // Servisten GeoJSON formatında temiz veriyi al
-        const geoData = await EarthquakeService.fetchAndProcess();
-        this.state.rawGeoJSON = geoData;
-
-        // Bilimsel Analizleri Yap (Referans kodundaki mantık)
-        this.runScientificAnalysis(geoData.features);
-
-        // Haritayı ve Arayüzü Güncelle
-        MapEngine.updateSource('earthquakes', geoData);
-        UIController.renderAll(this.state);
-    },
-
-    // --- REFERANS KODUNDAKİ BİLİMSEL MOTOR ---
-    runScientificAnalysis(features) {
-        let totalJoules = 0;
-        let shallowCount = 0;
-
-        features.forEach(f => {
-            const eq = f.properties;
-            // Gutenberg-Richter Enerji Formülü: Log(E) = 4.8 + 1.5M
-            totalJoules += Math.pow(10, 4.8 + (1.5 * eq.mag));
+    // 3. VERİ DÖNGÜSÜ
+    async dataCycle() {
+        UIController.updateStatus("TARANIYOR...");
+        try {
+            const geojson = await EarthquakeService.fetchAndProcess();
+            // GeoJSON içindeki ham özellikleri alalım
+            this.state.rawEvents = geojson.features.map(f => f.properties);
             
-            if (eq.depth < this.state.filters.depthLimit) shallowCount++;
+            this.applyFilters();
+            UIController.updateStatus("ONLINE");
+        } catch (err) {
+            UIController.updateStatus("BAĞLANTI HATASI");
+            console.error("Data Cycle Error:", err);
+        }
+    },
+
+    // 4. FİLTRELEME MANTIĞI
+    applyFilters() {
+        const { minMag, timeRange, depthFilter } = this.state.filters;
+        const now = Date.now();
+        const timeLimits = { 'hour': 3600000, 'day': 86400000, 'week': 604800000 };
+
+        this.state.filteredEvents = this.state.rawEvents.filter(ev => {
+            const mMatch = ev.mag >= minMag;
+            const tMatch = (now - ev.time) <= timeLimits[timeRange];
+            let dMatch = true;
+            if (depthFilter === 'shallow') dMatch = ev.depth < this.state.settings.shallowLimit;
+            if (depthFilter === 'deep') dMatch = ev.depth >= this.state.settings.shallowLimit;
+            
+            return mMatch && tMatch && dMatch;
         });
 
-        this.state.analytics.totalEnergyTJ = (totalJoules / 1e12).toFixed(2);
-        this.state.analytics.shallowRatio = features.length > 0 
-            ? ((shallowCount / features.length) * 100).toFixed(1) 
-            : 0;
+        // Veriyi güncelle (Harita + Liste + Analiz)
+        this.syncUI();
     },
 
-    setupEventListeners() {
-        // Global focus event (Listeden tıklama)
-        window.focusEvent = (coords, zoom = 8) => {
-            this.state.map.flyTo({ 
-                center: coords, 
-                zoom: zoom, 
-                duration: 2500, 
-                essential: true 
-            });
-        };
+    // 5. TÜM BİLEŞENLERİ SENKRONİZE ET
+    syncUI() {
+        // Haritadaki kaynağı güncelle
+        MapEngine.updateSource('earthquakes', {
+            type: 'FeatureCollection',
+            features: this.state.filteredEvents.map(ev => ({
+                type: 'Feature',
+                geometry: { type: 'Point', coordinates: [...ev.coordinates, ev.depth] },
+                properties: ev
+            }))
+        });
 
-        // Pencere yeniden boyutlandırma koruması (Tablet/Mobil)
-        window.addEventListener('resize', () => this.state.map.resize());
+        // UI bileşenlerini güncelle
+        UIController.renderAll(this.state.filteredEvents, this.state.settings.shallowLimit);
+    },
+
+    // 6. OLAY DİNLEYİCİLERİ
+    attachEventListeners() {
+        // Mag Slider
+        const slider = document.getElementById('mag-slider');
+        if (slider) {
+            slider.addEventListener('input', (e) => {
+                this.state.filters.minMag = parseFloat(e.target.value);
+                UIController.updateMagValue(e.target.value);
+                this.applyFilters();
+            });
+        }
+
+        // Zaman ve Derinlik Butonları
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const { time, depth } = e.target.dataset;
+                
+                if (time) this.state.filters.timeRange = time;
+                if (depth) this.state.filters.depthFilter = depth;
+
+                // Aktif buton görselini güncelle
+                UIController.updateActiveButtons(e.target);
+                this.applyFilters();
+            });
+        });
+
+        // Global Odaklanma (Listeden tıklayınca)
+        window.focusEvent = (coords) => {
+            this.state.map.flyTo({ center: coords, zoom: 8, duration: 2000, essential: true });
+        };
+    },
+
+    startClock() {
+        setInterval(() => {
+            const clock = document.getElementById('clock');
+            if (clock) clock.innerText = new Date().toLocaleTimeString('tr-TR');
+        }, 1000);
     }
 };
 
-// Uygulamayı Ateşle
+// Uygulamayı başlat
 App.init();
