@@ -1,7 +1,10 @@
 // SEISMO/src/js/main.js
-import { MapEngine } from '../core/map-engine.js';
-import { EarthquakeService } from '../services/earthquake.js';
-import { UIController } from './ui.js';
+import { MapEngine } from './components/map-engine.js';
+import { EarthquakeService } from './services/earthquake.js';
+import { UIController } from './components/ui-controller.js';
+
+// Geri kalan kodlar...
+
 
 const config = {
     token: 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q'
