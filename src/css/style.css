@@ -99,11 +99,65 @@ body.light-mode .app-container::before {
 .popup-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; }
 
 /* --- RESPONSIVE KATMANI --- */
+/* --- AKILLI MOBİL & BÖLÜNMÜŞ EKRAN DÜZENİ --- */
 @media (max-width: 1024px) {
-    .app-container { flex-direction: column; }
-    #map { position: sticky; top: 0; height: 45vh; flex-shrink: 0; }
-    .sidebar { position: relative; width: 100% !important; height: auto; padding: 10px; pointer-events: auto; }
-    .feed-sidebar { height: 60vh; border-left: none; border-top: 1px solid var(--border-ui); }
-    .global-analytics { display: none; }
-    .system-meta { display: none; }
+    .app-container {
+        display: block; 
+        height: auto;
+        overflow-y: auto;
+    }
+
+    #map {
+        height: 35vh; /* Bölünmüş ekranda harita çok yer kaplamasın */
+        width: 100%;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        border-bottom: 1px solid var(--border-ui);
+    }
+
+    .sidebar {
+        position: relative;
+        width: 100% !important;
+        padding: 10px;
+        pointer-events: auto;
+    }
+
+    /* Kartların içindeki yazıların taşmasını önleyelim */
+    .glass-card {
+        padding: 12px;
+        margin-bottom: 8px;
+    }
+
+    .glass-card h3 {
+        font-size: 10px;
+        margin-bottom: 10px;
+    }
+
+    /* Filtre butonlarını bölünmüş ekranda daha küçük yapalım */
+    .btn-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+    }
+
+    .filter-btn {
+        font-size: 9px;
+        padding: 6px 2px;
+    }
+
+    /* Sağ panel (Liste) mobilde ve bölünmüş ekranda tam genişlik olsun */
+    .feed-sidebar {
+        height: auto;
+        min-height: 50vh;
+        border-left: none;
+        background: var(--bg-main);
+    }
 }
+
+/* Ekstra Dar Ekranlar (Çok küçük bölünmüş pencereler) */
+@media (max-width: 400px) {
+    .brand-section h1 { font-size: 14px; }
+    .status-indicator { display: none; }
+    .top-bar { padding: 5px 10px; }
+}
+
