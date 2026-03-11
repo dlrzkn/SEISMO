@@ -12,19 +12,15 @@ export const UIController = {
     },
 
     renderAll(appState) {
-        // Liste ve Analiz Barı
         this.renderFeed(appState.filteredEvents);
         this.renderAnalytics(appState.analytics);
         
-        // Deprem Sayısı Güncelleme
         if (this.els.count) this.els.count.innerText = appState.filteredEvents.length;
         
-        // Enerji Değeri Güncelleme (TJ)
         if (this.els.energy) {
             this.els.energy.innerText = `${appState.analytics.totalEnergyTJ} TJ`;
         }
         
-        // Enerji Zaman Etiketi Güncelleme
         if (this.els.energyTimerange) {
             const labels = { 'hour': '1S', 'day': '24S', 'week': '7G' };
             this.els.energyTimerange.innerText = labels[appState.filters.timeRange] || '24S';
@@ -33,6 +29,9 @@ export const UIController = {
 
     renderFeed(events) {
         if (!this.els.feed) return;
+        
+        // Performans: DOM manipülasyonu öncesi fragment oluşturma
+        const fragment = document.createDocumentFragment();
         this.els.feed.innerHTML = '';
 
         events.forEach(eq => {
@@ -43,14 +42,14 @@ export const UIController = {
             node.innerHTML = `
                 <div class="source-tag">${eq.source}</div>
                 <div class="mag-block" style="border-left: 3px solid ${color}; padding-left: 10px;">
-                    <div style="color: ${color}; font-family: 'JetBrains Mono'; font-weight: 800; font-size: 18px;">
+                    <div class="mag-value" style="color: ${color};">
                         ${parseFloat(eq.mag).toFixed(1)}
                     </div>
-                    <div style="font-size: 8px; color: var(--text-secondary);">${eq.magType || 'MW'}</div>
+                    <div class="mag-type">${eq.magType || 'MW'}</div>
                 </div>
                 <div class="node-info">
-                    <div class="node-place" style="font-size: 12px; font-weight: 600; color: #fff;">${eq.place}</div>
-                    <div class="node-meta" style="font-size: 10px; color: var(--text-secondary); margin-top: 4px;">
+                    <div class="node-place">${eq.place}</div>
+                    <div class="node-meta">
                         ${parseFloat(eq.depth).toFixed(1)} km • ${new Date(eq.time).toLocaleTimeString('tr-TR')}
                     </div>
                 </div>
@@ -59,8 +58,10 @@ export const UIController = {
             node.onclick = () => {
                 if (window.focusEvent) window.focusEvent(eq.coordinates);
             };
-            this.els.feed.appendChild(node);
+            fragment.appendChild(node);
         });
+
+        this.els.feed.appendChild(fragment);
     },
 
     renderAnalytics(analytics) {
@@ -68,13 +69,13 @@ export const UIController = {
         const ratio = parseFloat(analytics.shallowRatio) || 0;
         
         this.els.analysis.innerHTML = `
-            <div class="analysis-header" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; font-weight: 700;">
+            <div class="analysis-header">
                 <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
                 <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
             </div>
-            <div class="depth-viz-container" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; display: flex;">
-                <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; height: 100%; transition: width 0.5s ease;"></div>
-                <div class="depth-bar-deep" style="width: ${100 - ratio}%; background: #00d2ff; height: 100%; transition: width 0.5s ease;"></div>
+            <div class="depth-viz-container">
+                <div class="depth-bar-shallow" style="width: ${ratio}%;"></div>
+                <div class="depth-bar-deep" style="width: ${100 - ratio}%;"></div>
             </div>
         `;
     },
@@ -85,7 +86,6 @@ export const UIController = {
 
     updateStatus(text) {
         if (this.els.status) {
-            // "GÜÇLÜ SİNYAL" gibi tekrarları önlemek için sadece gelen metni basıyoruz
             this.els.status.innerText = `SİNYAL: ${text.replace('SİNYAL: ', '')}`;
         }
     },
@@ -99,9 +99,11 @@ export const UIController = {
     },
 
     getMagColor(mag) {
-        if (mag < 3) return '#00d2ff';
-        if (mag < 5) return '#fceb5e';
-        if (mag < 7) return '#ff9100';
-        return '#ff4d4d';
+        // map-engine.js ile senkronize edilmiş bilimsel skala
+        if (mag < 2.0) return '#00d2ff';
+        if (mag < 4.0) return '#fceb5e';
+        if (mag < 5.5) return '#ff9100';
+        if (mag < 7.0) return '#ff1744';
+        return '#9c27b0';
     }
 };
