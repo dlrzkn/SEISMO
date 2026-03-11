@@ -11,25 +11,26 @@ export const UIController = {
         clock: document.getElementById('clock')
     },
 
-        renderAll(appState) {
+    renderAll(appState) {
+        // Liste ve Analiz Barı
         this.renderFeed(appState.filteredEvents);
         this.renderAnalytics(appState.analytics);
         
-        // Deprem Sayısı
+        // Deprem Sayısı Güncelleme
         if (this.els.count) this.els.count.innerText = appState.filteredEvents.length;
         
-        // Enerji Değeri (TJ)
-        if (this.els.energy) this.els.energy.innerText = `${appState.analytics.totalEnergyTJ} TJ`;
+        // Enerji Değeri Güncelleme (TJ)
+        if (this.els.energy) {
+            this.els.energy.innerText = `${appState.analytics.totalEnergyTJ} TJ`;
+        }
         
-        // Zaman Etiketi (1S, 24S, 7G)
+        // Enerji Zaman Etiketi Güncelleme
         if (this.els.energyTimerange) {
             const labels = { 'hour': '1S', 'day': '24S', 'week': '7G' };
-            this.els.energyTimerange.innerText = labels[appState.filters.timeRange];
+            this.els.energyTimerange.innerText = labels[appState.filters.timeRange] || '24S';
         }
     },
 
-
-    // SAĞ LİSTE: Senin o sevdiğin dikey badge tasarımı
     renderFeed(events) {
         if (!this.els.feed) return;
         this.els.feed.innerHTML = '';
@@ -55,35 +56,39 @@ export const UIController = {
                 </div>
             `;
 
-            node.onclick = () => window.focusEvent(eq.coordinates, 9);
+            node.onclick = () => {
+                if (window.focusEvent) window.focusEvent(eq.coordinates);
+            };
             this.els.feed.appendChild(node);
         });
     },
 
-    // DERİNLİK ANALİZİ: Kırmızı/Mavi Bar Tasarımı
-renderAnalytics(analytics) {
-    const ratio = analytics.shallowRatio;
-    this.els.analysis.innerHTML = `
-        <div class="analysis-header" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; font-weight: 700;">
-            <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
-            <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
-        </div>
-        <div class="depth-viz-container" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; display: flex;">
-            <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; height: 100%;"></div>
-            <div class="depth-bar-deep" style="width: ${100 - ratio}%; background: #00d2ff; height: 100%;"></div>
-        </div>
-    `;
-},
+    renderAnalytics(analytics) {
+        if (!this.els.analysis) return;
+        const ratio = parseFloat(analytics.shallowRatio) || 0;
+        
+        this.els.analysis.innerHTML = `
+            <div class="analysis-header" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; font-weight: 700;">
+                <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
+                <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
+            </div>
+            <div class="depth-viz-container" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; display: flex;">
+                <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; height: 100%; transition: width 0.5s ease;"></div>
+                <div class="depth-bar-deep" style="width: ${100 - ratio}%; background: #00d2ff; height: 100%; transition: width 0.5s ease;"></div>
+            </div>
+        `;
+    },
 
     updateMagValue(val) {
         if (this.els.magValue) this.els.magValue.innerText = `${parseFloat(val).toFixed(1)} Mw`;
     },
 
-
-       updateStatus(text) {
-        if (this.els.status) this.els.status.innerText = `SİNYAL: ${text}`;
+    updateStatus(text) {
+        if (this.els.status) {
+            // "GÜÇLÜ SİNYAL" gibi tekrarları önlemek için sadece gelen metni basıyoruz
+            this.els.status.innerText = `SİNYAL: ${text.replace('SİNYAL: ', '')}`;
+        }
     },
-
 
     updateActiveButtons(clickedBtn) {
         const parent = clickedBtn.parentElement;
