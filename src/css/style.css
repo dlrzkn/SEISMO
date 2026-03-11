@@ -1,5 +1,5 @@
 :root {
-    --bg-main: #06080a;
+    --bg-main: #0a0c10;
     --bg-card: rgba(18, 22, 28, 0.85);
     --border-ui: rgba(255, 255, 255, 0.08);
     --text-primary: #f0f0f0;
@@ -9,7 +9,7 @@
     --deep: #00d2ff;
     --header-height: 54px;
     --sidebar-width: 280px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition: all 0.3s ease;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -20,135 +20,100 @@ body {
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
-}
-
-/* --- HAREKETLİ YILDIZ ARKA PLANI --- */
-body::before {
-    content: "";
-    position: fixed;
-    width: 300%;
-    height: 300%;
-    top: -100%;
-    left: -100%;
-    background-image: 
-        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 100px 150px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 200px 400px, #ffffff, rgba(0,0,0,0));
-    background-size: 500px 500px;
-    animation: starRotation 180s linear infinite;
-    opacity: 0.15;
-    z-index: -1;
-    pointer-events: none;
-}
-
-@keyframes starRotation {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    overflow-y: auto;
 }
 
 /* --- HEADER --- */
 .top-bar {
-    height: var(--header-height);
+    height: auto;
+    min-height: var(--header-height);
     background: var(--bg-card);
     border-bottom: 1px solid var(--border-ui);
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(12px);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 10px 20px;
     z-index: 1000;
     position: sticky;
     top: 0;
 }
 
 .brand-section { display: flex; align-items: center; gap: 15px; }
-.logo-group h1 { font-size: 18px; font-weight: 800; letter-spacing: -0.5px; }
+.logo-group h1 { font-size: 18px; font-weight: 800; }
 .logo-group h1 span { color: var(--accent); }
-.sub-logo { font-size: 8px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; }
+.sub-logo { font-size: 7.5px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; }
 
-.status-indicator { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(0, 210, 255, 0.2); }
-.pulse-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 10px var(--accent); }
+.status-indicator { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 4px 10px; border-radius: 20px; }
+.pulse-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
 
 @keyframes pulse {
-    0% { transform: scale(0.9); opacity: 0.5; }
-    50% { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(0.9); opacity: 0.5; }
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 210, 255, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
 }
+
+.global-analytics { font-family: 'JetBrains Mono'; font-size: 13px; }
+.stat-value { color: var(--accent); font-weight: 700; }
+.system-meta { display: flex; align-items: center; gap: 15px; }
+.status-tag { font-size: 10px; padding: 4px 10px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-weight: 700; }
+.mono-clock { font-family: 'JetBrains Mono'; font-size: 14px; color: var(--text-secondary); }
 
 /* --- APP STRUCTURE --- */
-.app-container { position: relative; width: 100%; display: flex; height: calc(100vh - var(--header-height)); }
-#map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; background: #06080a; }
+.app-container { position: relative; width: 100%; display: flex; }
+#map { position: absolute; top: 0; left: 0; width: 100%; height: calc(100vh - var(--header-height)); z-index: 1; background-color: #06080a !important; }
 
-.sidebar { position: absolute; top: 0; z-index: 10; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
+.sidebar { position: absolute; top: 0; z-index: 10; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .sidebar > * { pointer-events: auto; }
 
-.control-sidebar { left: 0; width: 310px; }
-.feed-sidebar { right: 0; width: var(--sidebar-width); background: var(--bg-card); border-left: 1px solid var(--border-ui); backdrop-filter: blur(20px); padding: 0; }
+.control-sidebar { left: 0; width: 300px; }
+.feed-sidebar { right: 0; width: var(--sidebar-width); background: var(--bg-card); border-left: 1px solid var(--border-ui); backdrop-filter: blur(20px); padding: 0; pointer-events: auto; }
 
-/* --- GLASS CARDS --- */
-.glass-card { 
-    background: var(--bg-card); 
-    border: 1px solid var(--border-ui); 
-    border-radius: 12px; 
-    padding: 16px; 
-    box-shadow: 0 12px 40px rgba(0,0,0,0.4); 
-}
+/* --- CARDS & UI --- */
+.glass-card { background: var(--bg-card); border: 1px solid var(--border-ui); border-radius: 12px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); margin-bottom: 10px; }
+.glass-card h3 { font-size: 11px; text-transform: uppercase; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 15px; }
 
-.glass-card h3 { 
-    font-size: 10px; 
-    text-transform: uppercase; 
-    color: var(--accent); 
-    border-left: 3px solid var(--accent); 
-    padding-left: 10px; 
-    margin-bottom: 15px; 
-    letter-spacing: 1.5px;
-}
+.filter-group label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; color: var(--text-secondary); }
+.btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
+.filter-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-ui); color: var(--text-secondary); padding: 8px 2px; border-radius: 6px; font-size: 10px; cursor: pointer; transition: var(--transition); }
+.filter-btn.active { background: var(--accent); color: #000; font-weight: 700; }
 
-/* --- PRO KATMAN YÖNETİMİ --- */
+/* --- LEVHA SINIRLARI BUTONU (YENİ ŞIK VERSİYON) --- */
 #plate-boundaries { display: none; }
 .switch-label {
-    display: block;
-    width: 100%;
-    padding: 12px;
-    text-align: center;
-    font-size: 9px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--border-ui);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: var(--transition);
-    text-transform: uppercase;
+    display: block; width: 100%; padding: 10px; text-align: center; font-size: 9px; font-weight: 800; 
+    letter-spacing: 1px; color: var(--text-secondary); background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-ui); border-radius: 6px; cursor: pointer; transition: var(--transition);
 }
-
 #plate-boundaries:checked + .switch-label {
-    color: #ff4d4d;
-    border-color: #ff4d4d;
-    background: rgba(255, 77, 77, 0.1);
-    box-shadow: 0 0 15px rgba(255, 77, 77, 0.2);
+    color: #ff4d4d; border-color: #ff4d4d; background: rgba(255, 77, 77, 0.1); box-shadow: 0 0 15px rgba(255, 77, 77, 0.2);
 }
 
-/* --- DERİNLİK ANALİZ BARI (KIRMIZI-MAVİ) --- */
+/* --- ANALİZ BARI (KIRMIZI-MAVİ) --- */
 .depth-viz-container {
-    height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    overflow: hidden;
-    display: flex;
-    margin-top: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    height: 6px; background: rgba(255, 255, 255, 0.05); border-radius: 10px; overflow: hidden;
+    display: flex; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.depth-bar-shallow { height: 100%; background: var(--shallow); transition: width 1s ease; }
+.depth-bar-deep { height: 100%; background: var(--deep); transition: width 1s ease; }
+
+/* --- YILDIZLI ARKA PLAN --- */
+body.light-mode .app-container::before {
+    content: ""; position: absolute; width: 300%; height: 300%; top: -100%; left: -100%;
+    background-image: 
+        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 100px 150px, #ffffff, rgba(0,0,0,0));
+    background-size: 500px 500px;
+    animation: starRotation 180s linear infinite;
+    opacity: 0.25; z-index: 0; pointer-events: none;
 }
 
-.depth-bar-shallow { height: 100%; background: var(--shallow); transition: width 1s ease; box-shadow: 0 0 10px rgba(255, 77, 77, 0.3); }
-.depth-bar-deep { height: 100%; background: var(--deep); transition: width 1s ease; box-shadow: 0 0 10px rgba(0, 210, 255, 0.3); }
+@keyframes starRotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
     .app-container { display: block; height: auto; overflow-y: auto; }
-    #map { height: 40vh; position: sticky; top: 0; }
-    .sidebar { position: relative; width: 100% !important; height: auto; padding: 10px; pointer-events: auto; }
-    .feed-sidebar { min-height: 50vh; border-left: none; border-top: 1px solid var(--border-ui); }
+    #map { height: 35vh; width: 100%; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-ui); }
+    .sidebar { position: relative; width: 100% !important; padding: 10px; pointer-events: auto; }
+    .feed-sidebar { height: auto; min-height: 50vh; border-left: none; background: var(--bg-main); }
 }
-
