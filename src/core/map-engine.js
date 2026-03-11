@@ -71,12 +71,13 @@ export const MapEngine = {
                     'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 1, level.radBase, 10, level.radBase * 5],
                     'circle-color': level.color,
                     'circle-opacity': level.opacity,
-                    'circle-blur': level.blur
+                    'circle-blur': level.blur,
+                    'circle-pitch-alignment': 'map' // Perspektife göre yatay render
                 }
             });
         });
 
-        // 3. Genel Bilimsel Glow (Dinamik Spektrum)
+        // 3. Genel Sismik Bloom (Depth-Sensitive)
         this.map.addLayer({
             id: 'earthquake-glow',
             type: 'circle',
@@ -93,11 +94,15 @@ export const MapEngine = {
                     5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
                 'circle-opacity': 0.15,
-                'circle-blur': 1.5
+                'circle-blur': [
+                    'interpolate', ['linear'], ['get', 'depth'],
+                    0, 0.5,    // Sığ: Odaklı
+                    150, 2.0   // Derin: Dağınık/Bulanık
+                ]
             }
         });
 
-        // 4. Ana Sismik Odak Noktaları
+        // 4. Ana Sismik Odak Noktaları (Jeofiziksel Model)
         this.map.addLayer({
             id: 'earthquake-points',
             type: 'circle',
@@ -105,20 +110,26 @@ export const MapEngine = {
             paint: {
                 'circle-radius': [
                     'interpolate', ['exponential', 1.5], ['zoom'],
-                    1, ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 8, 8],
-                    10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30]
+                    1, ['interpolate', ['linear'], ['get', 'mag'], 1, 1.5, 8, 10],
+                    10, ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 8, 35]
                 ],
                 'circle-color': [
                     'interpolate', ['linear'], ['get', 'mag'],
                     0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
                     5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
-                'circle-opacity': 0.8,
-                'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 1, 0.5, 10, 2],
-                'circle-stroke-color': '#ffffff',
+                'circle-opacity': [
+                    'interpolate', ['linear'], ['zoom'],
+                    2, 0.65, // Uzaktan kümeleri ayırt etmek için şeffaf
+                    10, 0.9  // Yakından detaylı görünüm
+                ],
+                'circle-stroke-width': 1,
+                'circle-stroke-color': 'rgba(255,255,255,0.3)',
+                'circle-pitch-alignment': 'map',
                 'circle-stroke-opacity': [
                     'interpolate', ['linear'], ['get', 'depth'],
-                    0, 0.8, 100, 0.2
+                    0, 0.8,
+                    150, 0.2
                 ]
             }
         });
@@ -172,4 +183,3 @@ export const MapEngine = {
         }
     }
 };
-
