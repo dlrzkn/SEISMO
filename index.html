@@ -34,6 +34,7 @@
 
     <main class="app-container">
         <div id="map"></div> 
+        
         <aside class="sidebar control-sidebar">
             <div class="glass-card">
                 <h3>Sismik Filtreler</h3>
@@ -58,6 +59,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="glass-card layer-card">
+                <h3>SİSTEM & KATMAN YÖNETİMİ</h3>
+                <div class="control-row plate-row">
+                    <input type="checkbox" id="plate-boundaries">
+                    <label for="plate-boundaries" class="switch-label">LEVHA SINIRLARINI GÖSTER</label>
+                </div>
+            </div>
+
             <div class="glass-card stats-card">
                 <h3>Derinlik Dağılım Analizi</h3>
                 <div id="depth-analysis" class="analysis-box">Veriler işleniyor...</div>
@@ -76,3 +86,4 @@
     <script type="module" src="/src/js/main.js"></script>
 </body>
 </html>
+
