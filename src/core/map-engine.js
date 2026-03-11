@@ -178,30 +178,50 @@ export const MapEngine = {
         });
     },
 
-    setupInteraction() {
-        this.map.on('click', 'earthquake-points', (e) => {
-            const p = e.features[0].properties;
-            const coords = e.features[0].geometry.coordinates;
+   setupInteraction() {
+    this.map.on('click', 'earthquake-points', (e) => {
+        const p = e.features[0].properties;
+        const coords = e.features[0].geometry.coordinates;
+        const dateObj = new Date(p.time);
 
-            new mapboxgl.Popup({ offset: 15, className: 'seismo-popup' })
-                .setLngLat(coords)
-                .setHTML(`
-                    <div class="popup-content">
-                        <div class="popup-header">
-                            <span class="popup-source">${p.source}</span>
-                            <span class="popup-mag">${parseFloat(p.mag).toFixed(1)} <small>Mw</small></span>
-                        </div>
-                        <div class="popup-body">
-                            <p class="popup-place">${p.place}</p>
-                            <div class="popup-grid">
-                                <div><small>DERİNLİK</small><br>${parseFloat(p.depth).toFixed(1)} KM</div>
-                                <div><small>SAAT</small><br>${new Date(p.time).toLocaleTimeString('tr-TR')}</div>
-                            </div>
+        new mapboxgl.Popup({ offset: 15, className: 'seismo-popup' })
+            .setLngLat(coords)
+            .setHTML(`
+                <div class="popup-main">
+                    <div class="popup-header-block">
+                        <span class="popup-source-tag">${p.source}</span>
+                        <div class="popup-mag-block">
+                            <span class="popup-mag-value">${parseFloat(p.mag).toFixed(1)}</span>
+                            <small>Mw</small>
                         </div>
                     </div>
-                `)
-                .addTo(this.map);
-        });
+                    <div class="popup-place-block">${p.place}</div>
+                    <div class="popup-data-grid">
+                        <div class="data-node">
+                            <div class="data-node-label">DERİNLİK</div>
+                            <div class="data-node-value">${parseFloat(p.depth).toFixed(1)} KM</div>
+                        </div>
+                        <div class="data-node">
+                            <div class="data-node-label">TARİH</div>
+                            <div class="data-node-value">${dateObj.toLocaleDateString('tr-TR')}</div>
+                        </div>
+                        <div class="data-node">
+                            <div class="data-node-label">SAAT (TSI)</div>
+                            <div class="data-node-value">${dateObj.toLocaleTimeString('tr-TR')}</div>
+                        </div>
+                        <div class="data-node">
+                            <div class="data-node-label">KOORDİNAT</div>
+                            <div class="data-node-value">${coords[1].toFixed(2)}N / ${coords[0].toFixed(2)}E</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; border-top: 1px solid rgba(0,210,255,0.1); padding-top: 10px;">
+                        <a href="${p.url}" target="_blank" class="popup-link-btn">DETAYLI ANALİZ ↗</a>
+                    </div>
+                </div>
+            `)
+            .addTo(this.map);
+    });
+
 
         this.map.on('mouseenter', 'earthquake-points', () => { this.map.getCanvas().style.cursor = 'pointer'; });
         this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
