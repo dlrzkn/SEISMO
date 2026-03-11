@@ -84,11 +84,24 @@ body {
 
 /* --- YILDIZLI ARKA PLAN --- */
 body.light-mode .app-container::before {
-    content: ""; position: absolute; width: 250%; height: 250%; top: -75%; left: -75%;
-    background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 100px 150px, #ffffff, rgba(0,0,0,0));
-    background-size: 400px 400px; animation: starRotation 200s linear infinite; opacity: 0.2; z-index: 0; pointer-events: none;
+    content: ""; position: absolute; width: 300%; height: 300%; top: -100%; left: -100%;
+    background-image: 
+        radial-gradient(1.5px 1.5px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+        radial-gradient(2px 2px at 100px 150px, #ffffff, rgba(0,0,0,0));
+    background-size: 500px 500px;
+    animation: starRotation 180s linear infinite; /* Yıldızlar artık dönecek */
+    opacity: 0.25;
+    z-index: 0;
 }
-@keyframes starRotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@keyframes starRotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Harita arka plan kontrastı */
+#map { background-color: #06080a !important; }
+
 
 /* --- PRO POP-UP --- */
 .mapboxgl-popup-content {
