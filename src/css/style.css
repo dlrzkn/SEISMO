@@ -78,15 +78,25 @@ body {
 .filter-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-ui); color: var(--text-secondary); padding: 8px 2px; border-radius: 6px; font-size: 10px; cursor: pointer; transition: var(--transition); }
 .filter-btn.active { background: var(--accent); color: #000; font-weight: 700; }
 
-/* --- LEVHA SINIRLARI BUTONU (YENİ ŞIK VERSİYON) --- */
-#plate-boundaries { display: none; }
+/* --- KATMAN YÖNETİM BUTONLARI (PLATE & HEATMAP) --- */
+#plate-boundaries, #heatmap-toggle { display: none; }
+
 .switch-label {
     display: block; width: 100%; padding: 10px; text-align: center; font-size: 9px; font-weight: 800; 
     letter-spacing: 1px; color: var(--text-secondary); background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border-ui); border-radius: 6px; cursor: pointer; transition: var(--transition);
+    margin-bottom: 8px; text-transform: uppercase;
 }
-#plate-boundaries:checked + .switch-label {
-    color: #ff4d4d; border-color: #ff4d4d; background: rgba(255, 77, 77, 0.1); box-shadow: 0 0 15px rgba(255, 77, 77, 0.2);
+
+.switch-label:hover { background: rgba(255, 255, 255, 0.08); }
+
+/* Aktif (Seçili) Durum Stili */
+#plate-boundaries:checked + .switch-label,
+#heatmap-toggle:checked + .switch-label {
+    color: #ff4d4d; 
+    border-color: #ff4d4d; 
+    background: rgba(255, 77, 77, 0.15); 
+    box-shadow: 0 0 20px rgba(255, 77, 77, 0.3);
 }
 
 /* --- ANALİZ BARI (KIRMIZI-MAVİ) --- */
@@ -113,7 +123,8 @@ body.light-mode .app-container::before {
 /* --- RESPONSIVE --- */
 @media (max-width: 1024px) {
     .app-container { display: block; height: auto; overflow-y: auto; }
-    #map { height: 35vh; width: 100%; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-ui); }
+    #map { height: 45vh; width: 100%; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-ui); }
     .sidebar { position: relative; width: 100% !important; padding: 10px; pointer-events: auto; }
     .feed-sidebar { height: auto; min-height: 50vh; border-left: none; background: var(--bg-main); }
 }
+
