@@ -128,5 +128,3 @@ body {
     .feed-sidebar { border-left: none; border-top: 1px solid var(--border-ui); flex-grow: 1; min-height: 0; }
     .feed-scroll { height: 100%; }
 }
-
-
