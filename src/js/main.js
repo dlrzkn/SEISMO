@@ -111,65 +111,15 @@ const App = {
             ? ((shallowCount / this.state.filteredEvents.length) * 100).toFixed(1) 
             : 0;
 
-        // YENİ: Toplam Enerji UI Güncellemesi (Filtreye göre 1S, 24S, 7G dinamik değişir)
+        // YENİ EKLENEN: Enerji UI Güncellemesi (Zamana göre dinamik)
         const energyEl = document.getElementById('energy-total-tj');
         const timeLabelEl = document.getElementById('energy-time-label');
         if (energyEl) energyEl.innerText = this.state.analytics.totalEnergyTJ;
         if (timeLabelEl) {
-            const labels = { 'hour': 'SON 1 SAAT', 'day': 'SON 24 SAAT', 'week': 'SON 7 GÜN' };
+            const labels = { 'hour': '1S', 'day': '24S', 'week': '7G' };
             timeLabelEl.innerText = labels[this.state.filters.timeRange] || '24S';
         }
     },
-
-    setupMobileNavigation() {
-        const navButtons = document.querySelectorAll('.nav-btn');
-        const body = document.body;
-
-        // Başlangıç durumu
-        if (window.innerWidth <= 768) {
-            body.classList.add('tab-map');
-        }
-
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const currentBtn = e.currentTarget;
-                const target = currentBtn.getAttribute('data-target');
-                const isAlreadyActive = currentBtn.classList.contains('active');
-
-                // 1. Tıklanan sekme "Harita" ise
-                if (target === 'map') {
-                    if (isAlreadyActive) {
-                        // Haritadayken bir daha basarsa Katman panelini aç/kapat (Dünya'ya tıklandığında)
-                        body.classList.toggle('show-layers');
-                    } else {
-                        // Temiz haritaya geç
-                        body.classList.remove('tab-analysis', 'tab-list', 'show-layers');
-                        body.classList.add('tab-map');
-                    }
-                } 
-                // 2. Tıklanan sekme Analiz veya Liste ise
-                else {
-                    if (isAlreadyActive) {
-                        // Açık olan panele tekrar basıldı, haritaya geri dön
-                        document.querySelector('.nav-btn[data-target="map"]').click();
-                        return;
-                    } else {
-                        // İlgili sekmeyi aç
-                        body.classList.remove('tab-map', 'tab-analysis', 'tab-list', 'show-layers');
-                        body.classList.add(`tab-${target}`);
-                    }
-                }
-
-                // Aktif buton stilini güncelle
-                navButtons.forEach(b => b.classList.remove('active'));
-                currentBtn.classList.add('active');
-
-                // Mapbox yeniden boyutlandırma
-                if (this.state.map) setTimeout(() => this.state.map.resize(), 50);
-            });
-        });
-    },
-
 
     syncUI() {
         if (this.state.map) {
@@ -233,54 +183,58 @@ const App = {
             });
         };
 
-        // YENİ EKLENEN: Mobil Alt Menü Navigasyonu
+        // Mobil Alt Menü Navigasyonu
         this.setupMobileNavigation();
     },
 
     setupMobileNavigation() {
         const navButtons = document.querySelectorAll('.nav-btn');
-        const panels = {
-            'map': document.getElementById('map'),
-            'control-sidebar': document.querySelector('.control-sidebar'),
-            'feed-sidebar': document.querySelector('.feed-sidebar')
-        };
+        const body = document.body;
 
-        // Başlangıç durumu: Haritayı aktif et
-        if (window.innerWidth <= 768 && panels['map']) {
-            panels['map'].classList.add('mobile-active');
+        // Başlangıç durumu: Uygulama ilk açıldığında harita aktif olsun
+        if (window.innerWidth <= 1024) {
+            body.classList.add('tab-map');
         }
 
         navButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const currentBtn = e.currentTarget;
-                const targetId = currentBtn.getAttribute('data-target');
+                const target = currentBtn.getAttribute('data-target');
+                const isAlreadyActive = currentBtn.classList.contains('active');
 
-                // Kontrol: Eğer tıklanan buton zaten aktifse ve harita değilse, haritaya geri dön (paneli kapat)
-                if (currentBtn.classList.contains('active') && targetId !== 'map') {
-                    const mapBtn = Array.from(navButtons).find(b => b.getAttribute('data-target') === 'map');
-                    if (mapBtn) mapBtn.click();
-                    return; // İşlemi kes
+                // 1. Tıklanan sekme "Harita" ise
+                if (target === 'map') {
+                    if (isAlreadyActive) {
+                        // Haritadayken bir daha basarsa Katman panelini aç/kapat
+                        body.classList.toggle('show-layers');
+                    } else {
+                        // Temiz haritaya geç
+                        body.classList.remove('tab-analysis', 'tab-list', 'show-layers');
+                        body.classList.add('tab-map');
+                    }
+                } 
+                // 2. Tıklanan sekme "Analiz" veya "Liste" ise
+                else {
+                    if (isAlreadyActive) {
+                        // Açık olan panele tekrar basıldı, kapat ve haritaya dön
+                        document.querySelector('.nav-btn[data-target="map"]').click();
+                        return;
+                    } else {
+                        // İlgili sekmeyi aç
+                        body.classList.remove('tab-map', 'tab-analysis', 'tab-list', 'show-layers');
+                        body.classList.add(`tab-${target}`);
+                    }
                 }
 
-                // Normal işleyiş: Diğer aktif sınıfları temizle ve tıklanana ekle
+                // Aktif buton görselini güncelle
                 navButtons.forEach(b => b.classList.remove('active'));
                 currentBtn.classList.add('active');
 
-                // Tüm panelleri gizle
-                Object.values(panels).forEach(panel => {
-                    if (panel) panel.classList.remove('mobile-active');
-                });
-                
-                // Hedef paneli göster
-                if (panels[targetId]) {
-                    panels[targetId].classList.add('mobile-active');
-                    
-                    // Mapbox Resize Tetikleyicisi
-                    if (targetId === 'map' && this.state.map) {
-                        setTimeout(() => {
-                            this.state.map.resize();
-                        }, 50);
-                    }
+                // Mapbox haritasının boyutlarını güncelle (gri ekran hatasını önler)
+                if (this.state.map) {
+                    setTimeout(() => {
+                        this.state.map.resize();
+                    }, 50);
                 }
             });
         });
