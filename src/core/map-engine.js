@@ -88,13 +88,18 @@ export const MapEngine = {
                     10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30]
                 ],
                 'circle-color': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    2.0, '#00d2ff',
-                    4.0, '#fceb5e',
-                    5.5, '#ff9100',
-                    7.0, '#ff1744',
-                    8.0, '#9c27b0'
-                ],
+    'interpolate', ['linear'], ['get', 'mag'],
+    0.0, '#D3D3D3', // Mikro: Açık Gri
+    2.0, '#0000FF', // Çok Küçük: Mavi
+    3.0, '#00FF00', // Küçük: Yeşil
+    4.0, '#FFFF00', // Hafif: Sarı
+    5.0, '#FFA500', // Orta: Turuncu
+    6.0, '#FF8C00', // Şiddetli: Koyu Turuncu
+    7.0, '#FF0000', // Çok Şiddetli: Kırmızı
+    8.0, '#8B0000', // Büyük: Koyu Kırmızı
+    9.0, '#4b0082'  // Muazzam: İndigo/Mor
+],
+
                 'circle-opacity': 0.8,
                 'circle-stroke-width': [
                     'interpolate', ['linear'], ['zoom'],
