@@ -62,13 +62,15 @@
 
             <div class="glass-card layer-card">
                 <h3>SİSTEM & KATMAN YÖNETİMİ</h3>
-                <div class="control-row plate-row">
-                    <input type="checkbox" id="plate-boundaries">
-                    <label for="plate-boundaries" class="switch-label">LEVHA SINIRLARINI GÖSTER</label>
+                
+                <div class="control-row">
+                    <input type="checkbox" id="plate-boundaries" class="layer-checkbox">
+                    <label for="plate-boundaries" class="layer-control-btn">LEVHA SINIRLARINI GÖSTER</label>
                 </div>
-                <div class="control-row heatmap-row" style="margin-top: 10px;">
-                    <input type="checkbox" id="heatmap-toggle">
-                    <label for="heatmap-toggle" class="switch-label">YOĞUNLUK ANALİZİ (HEATMAP)</label>
+
+                <div class="control-row">
+                    <input type="checkbox" id="heatmap-toggle" class="layer-checkbox">
+                    <label for="heatmap-toggle" class="layer-control-btn">YOĞUNLUK ANALİZİ (HEATMAP)</label>
                 </div>
             </div>
 
@@ -90,5 +92,3 @@
     <script type="module" src="/src/js/main.js"></script>
 </body>
 </html>
-
-
