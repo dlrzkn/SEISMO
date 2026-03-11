@@ -146,7 +146,7 @@ export const MapEngine = {
         });
     },
 
-    setupInteraction() {
+       setupInteraction() {
         this.map.on('click', 'earthquake-points', (e) => {
             const p = e.features[0].properties;
             const coords = e.features[0].geometry.coordinates;
@@ -164,7 +164,7 @@ export const MapEngine = {
                             </div>
                         </div>
                         <div class="popup-place-block">${p.place}</div>
-                        <div class="popup-data-grid">
+                        <div class="popup-data-grid" style="align-items: center;">
                             <div class="data-node">
                                 <div class="data-node-label">DERİNLİK</div>
                                 <div class="data-node-value">${parseFloat(p.depth).toFixed(1)} KM</div>
@@ -181,9 +181,9 @@ export const MapEngine = {
                                 <div class="data-node-label">KOORDİNAT</div>
                                 <div class="data-node-value">${coords[1].toFixed(2)}N / ${coords[0].toFixed(2)}E</div>
                             </div>
-                        </div>
-                        <div style="margin-top: 10px; border-top: 1px solid rgba(0,210,255,0.1); padding-top: 10px;">
-                            <a href="${p.url}" target="_blank" class="popup-link-btn">DETAYLI ANALİZ ↗</a>
+                            <div class="data-node" style="padding-top: 4px;">
+                                <a href="${p.url}" target="_blank" class="popup-link-btn" style="width: 100%;">DETAYLI ANALİZ ↗</a>
+                            </div>
                         </div>
                     </div>
                 `)
@@ -193,6 +193,7 @@ export const MapEngine = {
         this.map.on('mouseenter', 'earthquake-points', () => { this.map.getCanvas().style.cursor = 'pointer'; });
         this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
     },
+
 
     setupAtmosphere() {
         this.map.setFog({
