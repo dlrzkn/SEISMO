@@ -113,7 +113,6 @@ const App = {
     },
 
     syncUI() {
-        // Gereksiz render yükünü engellemek için sadece veri varsa güncelle
         if (this.state.map) {
             MapEngine.updateSource('earthquakes', {
                 type: 'FeatureCollection',
@@ -131,6 +130,7 @@ const App = {
     },
 
     attachEventListeners() {
+        // Magnitude Slider
         document.getElementById('mag-slider')?.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             this.state.filters.minMag = val;
@@ -138,6 +138,7 @@ const App = {
             this.applyFilters();
         });
 
+        // Zaman ve Derinlik Filtreleri
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const { time, depth } = e.target.dataset;
@@ -148,10 +149,19 @@ const App = {
             });
         });
 
+        // Levha Sınırları Toggle
         document.getElementById('plate-boundaries')?.addEventListener('change', (e) => {
             const visibility = e.target.checked ? 'visible' : 'none';
-            if (this.state.map && this.state.map.getLayer('plates-layer')) {
-                this.map.setLayoutProperty('plates-layer', 'visibility', visibility);
+            if (this.state.map?.getLayer('plates-layer')) {
+                this.state.map.setLayoutProperty('plates-layer', 'visibility', visibility);
+            }
+        });
+
+        // Isı Haritası (Heatmap) Toggle
+        document.getElementById('heatmap-toggle')?.addEventListener('change', (e) => {
+            const visibility = e.target.checked ? 'visible' : 'none';
+            if (this.state.map?.getLayer('earthquakes-heat')) {
+                this.state.map.setLayoutProperty('earthquakes-heat', 'visibility', visibility);
             }
         });
 
