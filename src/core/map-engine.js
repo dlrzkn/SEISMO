@@ -51,10 +51,32 @@ export const MapEngine = {
                 'line-dasharray': [2, 1],
                 'line-opacity': 0.6
             },
-            layout: { 'visibility': 'none' } // Başlangıçta kapalı, butonla açılır
+            layout: { 'visibility': 'none' }
         });
 
-        // 2. Bilimsel Richter Skalalı Glow Noktalar
+        // 2. Glow (Parlama) Katmanı - Bilimsel Yayılım
+        this.map.addLayer({
+            id: 'earthquake-glow',
+            type: 'circle',
+            source: 'earthquakes',
+            paint: {
+                'circle-radius': [
+                    'interpolate', ['exponential', 2], ['zoom'],
+                    1, ['interpolate', ['linear'], ['get', 'mag'], 1, 5, 8, 25],
+                    10, ['interpolate', ['linear'], ['get', 'mag'], 1, 15, 8, 80]
+                ],
+                'circle-color': [
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    2.0, '#00d2ff',
+                    5.5, '#ff9100',
+                    8.0, '#9c27b0'
+                ],
+                'circle-opacity': 0.15,
+                'circle-blur': 1.5
+            }
+        });
+
+        // 3. Ana Sismik Noktalar - Richter ve Derinlik Odaklı
         this.map.addLayer({
             id: 'earthquake-points',
             type: 'circle',
@@ -73,18 +95,17 @@ export const MapEngine = {
                     7.0, '#ff1744',
                     8.0, '#9c27b0'
                 ],
-                'circle-opacity': 0.75,
+                'circle-opacity': 0.8,
                 'circle-stroke-width': [
                     'interpolate', ['linear'], ['zoom'],
                     1, 0.5,
                     10, 2
                 ],
                 'circle-stroke-color': '#ffffff',
-                'circle-stroke-opacity': 0.4,
-                'circle-blur': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    2, 0.1,
-                    7, 0.5
+                'circle-stroke-opacity': [
+                    'interpolate', ['linear'], ['get', 'depth'],
+                    0, 0.8,   // Yüzeye yakın: Net
+                    100, 0.2  // Derin: Belirsiz
                 ]
             }
         });
@@ -115,7 +136,6 @@ export const MapEngine = {
                 .addTo(this.map);
         });
 
-        // Mouse imlecini değiştir
         this.map.on('mouseenter', 'earthquake-points', () => { this.map.getCanvas().style.cursor = 'pointer'; });
         this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
     },
@@ -131,8 +151,11 @@ export const MapEngine = {
     },
 
     updateSource(id, data) {
-        if (this.map.getSource(id)) {
-            this.map.getSource(id).setData(data);
+        const source = this.map.getSource(id);
+        if (source) {
+            requestAnimationFrame(() => {
+                source.setData(data);
+            });
         }
     }
 };
