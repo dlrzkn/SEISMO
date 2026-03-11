@@ -57,29 +57,50 @@ export const MapEngine = {
         });
 
         // 2. Deprem Noktaları (Görseldeki Glow Efekti)
-        this.map.addLayer({
-            id: 'earthquake-points',
-            type: 'circle',
-            source: 'earthquakes',
-            paint: {
-                'circle-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    2, ['interpolate', ['linear'], ['get', 'mag'], 2, 2, 8, 12],
-                    10, ['interpolate', ['linear'], ['get', 'mag'], 2, 4, 8, 40]
-                ],
-                'circle-color': [
-                    'step', ['get', 'mag'],
-                    '#00d2ff', 4.0, // Minor
-                    '#fceb5e', 5.5, // Moderate
-                    '#ff9100', 7.0, // Strong
-                    '#ff1744'       // Major
-                ],
-                'circle-stroke-width': 1,
-                'circle-stroke-color': '#fff',
-                'circle-opacity': 0.8
-            }
-        });
-    },
+   initLayers() {
+    this.map.addLayer({
+        id: 'earthquake-points',
+        type: 'circle',
+        source: 'earthquakes',
+        paint: {
+            // ZOOM VE BÜYÜKLÜK DENGESİ: Noktalar zoom yapınca devleşmez, 
+            // ama büyük depremler küçüklerden her zaman ayırt edilir.
+            'circle-radius': [
+                'interpolate', ['exponential', 1.5], ['zoom'],
+                1, ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 8, 8],  // Uzaktan (dünya geneli) çok küçük noktalar
+                10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30] // Yakından (yerel) detaylı ama kontrollü boyutlar
+            ],
+
+            // BİLİMSEL RICHTER SKALASI RENKLERİ:
+            'circle-color': [
+                'interpolate', ['linear'], ['get', 'mag'],
+                2.0, '#00d2ff', // Mikro (Siyan)
+                4.0, '#fceb5e', // Hafif (Sarı)
+                5.5, '#ff9100', // Orta (Turuncu)
+                7.0, '#ff1744', // Şiddetli (Kırmızı)
+                8.0, '#9c27b0'  // Felaket (Mor)
+            ],
+
+            // GLOW VE DERİNLİK EFEKTİ:
+            'circle-opacity': 0.75,
+            'circle-stroke-width': [
+                'interpolate', ['linear'], ['zoom'],
+                1, 0.5,
+                10, 2
+            ],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-opacity': 0.4,
+            
+            // Parlama (Glow) miktarını Richter ölçeğine bağlıyoruz
+            'circle-blur': [
+                'interpolate', ['linear'], ['get', 'mag'],
+                2, 0.1,
+                7, 0.5
+            ]
+        }
+    });
+}
+
 
     // GÖRSELDEKİ POPUP MANTIĞI
     setupInteraction() {
