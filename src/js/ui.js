@@ -99,11 +99,12 @@ export const UIController = {
     },
 
     getMagColor(mag) {
-        // map-engine.js ile senkronize edilmiş bilimsel skala
-        if (mag < 2.0) return '#00d2ff';
-        if (mag < 4.0) return '#fceb5e';
-        if (mag < 5.5) return '#ff9100';
-        if (mag < 7.0) return '#ff1744';
-        return '#9c27b0';
-    }
+    if (mag <= 3.0) return '#4caf50'; // Mikro/Küçük - Standart Yeşil
+    if (mag <= 4.5) return '#fceb5e'; // Hafif - Parlak Sarı
+    if (mag <= 5.9) return '#ff9100'; // Orta - Turuncu
+    if (mag <= 6.9) return '#ff1744'; // Güçlü - Kırmızı
+    return '#9c27b0';                // Büyük/Yıkıcı - Mor
+}
+
+
 };
