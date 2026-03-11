@@ -72,9 +72,10 @@ renderAnalytics(analytics) {
     },
 
   updateStatus(status) {
-    // "Güçlü Sinyal" yerine sadece "Güçlü"
-    this.els.status.innerText = `SİNYAL: ${status.replace(' SİNYAL', '')}`;
-  }
+       updateStatus(text) {
+        if (this.els.status) this.els.status.innerText = `SİNYAL: ${text}`;
+    },
+
 
     updateActiveButtons(clickedBtn) {
         const parent = clickedBtn.parentElement;
