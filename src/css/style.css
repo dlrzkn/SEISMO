@@ -1,5 +1,6 @@
 :root {
-    --bg-main: #0a0c10;
+    /* Uzay derinliği için zifiri siyah yerine çok koyu lacivert-gri tonu */
+    --bg-main: #06090f; 
     --bg-card: rgba(18, 22, 28, 0.85);
     --border-ui: rgba(255, 255, 255, 0.08);
     --text-primary: #f0f0f0;
@@ -12,114 +13,77 @@
     --transition: all 0.3s ease;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ... Yıldızlar ve Arka Plan Revizyonu ... */
 
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg-main);
     color: var(--text-primary);
     height: 100vh;
-    overflow: hidden; /* Beğendiğiniz sürümdeki gibi taşmaları engeller */
+    overflow: hidden;
 }
 
-/* --- HEADER --- */
-.top-bar {
-    height: var(--header-height);
-    background: var(--bg-card);
-    border-bottom: 1px solid var(--border-ui);
-    backdrop-filter: blur(12px);
+/* App container'a derinlik veren gradient */
+.app-container {
+    position: relative;
+    height: calc(100vh - var(--header-height));
+    width: 100%;
+    background: radial-gradient(circle at center, #0d1521 0%, #06090f 100%);
+}
+
+/* Hareketli Yıldız Katmanı (Daha yumuşak ve belirgin) */
+.app-container::before {
+    content: "";
+    position: absolute;
+    width: 300%; 
+    height: 300%;
+    top: -100%;
+    left: -100%;
+    background-image: 
+        radial-gradient(1.2px 1.2px at 40px 60px, rgba(255,255,255,0.5), rgba(0,0,0,0)),
+        radial-gradient(1.8px 1.8px at 120px 180px, rgba(255,255,255,0.4), rgba(0,0,0,0)),
+        radial-gradient(1px 1px at 250px 350px, rgba(255,255,255,0.3), rgba(0,0,0,0));
+    background-size: 550px 550px;
+    animation: starRotation 240s linear infinite;
+    opacity: 0.4;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Harita arka planını şeffaf yap ki aşağıdaki gradient ve yıldızlar görünsün */
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: transparent !important;
+}
+
+/* Yıldız Dönüş Animasyonu */
+@keyframes starRotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ... Diğer UI öğeleri (Header, Sidebar, Cards) aynı kalabilir ... */
+
+/* Derinlik Analizi Hizalama Düzeltmesi */
+.analysis-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    z-index: 1000;
+    justify-content: space-between; /* Yüzdeleri iki uca yaslar */
+    width: 100%;
+    margin-bottom: 8px;
 }
 
-.brand-section { display: flex; align-items: center; gap: 15px; }
-.logo-group { display: flex; flex-direction: column; line-height: 1.1; }
-.brand-section h1 { font-size: 18px; font-weight: 800; }
-.brand-section h1 span { color: var(--accent); }
-.sub-logo { font-size: 7.5px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 500; margin-top: 1px; opacity: 0.75; }
-
-.status-indicator { display: flex; align-items: center; gap: 8px; background: rgba(0, 210, 255, 0.1); padding: 4px 10px; border-radius: 20px; }
-.pulse-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(0, 210, 255, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
-}
-
-.global-analytics { position: absolute; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono'; }
-.stat-value { color: var(--accent); font-weight: 700; }
-
-.system-meta { display: flex; align-items: center; gap: 20px; }
-.status-tag { font-size: 10px; padding: 4px 10px; border: 1px solid var(--accent); border-radius: 4px; color: var(--accent); font-weight: 700; }
-.mono-clock { font-family: 'JetBrains Mono'; font-size: 14px; color: var(--text-secondary); }
-
-/* --- APP STRUCTURE --- */
-.app-container { position: relative; height: calc(100vh - var(--header-height)); width: 100%; }
-#map { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
-.sidebar { position: absolute; top: 0; z-index: 10; height: 100%; padding: 15px; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
-.sidebar > * { pointer-events: auto; }
-
-.control-sidebar { left: 0; width: 300px; }
-.feed-sidebar { right: 0; width: var(--sidebar-width); background: var(--bg-card); border-left: 1px solid var(--border-ui); backdrop-filter: blur(20px); padding: 0; display: flex; flex-direction: column; }
-
-/* --- CARDS & UI --- */
-.glass-card { background: var(--bg-card); border: 1px solid var(--border-ui); border-radius: 12px; padding: 18px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-.glass-card h3 { font-size: 11px; text-transform: uppercase; color: var(--accent); border-left: 3px solid var(--accent); padding-left: 10px; margin-bottom: 15px; }
-
-.filter-group { margin-bottom: 15px; }
-.filter-group label { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 8px; color: var(--text-secondary); }
-
-.btn-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-.filter-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border-ui); color: var(--text-secondary); padding: 8px 2px; border-radius: 6px; font-size: 10px; cursor: pointer; transition: 0.2s; }
-.filter-btn.active { background: var(--accent); color: #000; font-weight: 700; }
-
-/* --- KATMAN YÖNETİMİ (BEĞENDİĞİNİZ SİBER STİL) --- */
-#plate-boundaries, #heatmap-toggle { display: none; } /* Tik işaretlerini tamamen yok eder */
-
-.layer-control-btn { 
-    display: block; width: 100%; text-align: center; font-size: 8.5px; font-weight: 800; 
-    color: var(--text-secondary); cursor: pointer; padding: 8px; 
-    border: 1px solid var(--border-ui); border-radius: 4px; transition: 0.2s; 
-    margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;
-}
-
-/* Aktiflik Durumları */
-#plate-boundaries:checked + .layer-control-btn,
-#heatmap-toggle:checked + .layer-control-btn { 
-    border-color: #ff4d4d; color: #ff4d4d; background: rgba(255, 77, 77, 0.1); 
-    box-shadow: 0 0 10px rgba(255, 77, 77, 0.2);
-}
-
-/* --- ANALİZ BARI VE HİZALAMA (DÜZELTİLDİ) --- */
-.analysis-header { display: flex; justify-content: space-between; width: 100%; margin-bottom: 8px; }
-.depth-viz-container { height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; display: flex; margin-top: 10px; border: 1px solid var(--border-ui); }
-.depth-bar-shallow { height: 100%; background: var(--shallow); transition: width 0.8s ease; }
-.depth-bar-deep { height: 100%; background: var(--deep); transition: width 0.8s ease; }
-
-/* --- FEED --- */
-.feed-header { padding: 15px; border-bottom: 1px solid var(--border-ui); display: flex; justify-content: space-between; align-items: center; }
-.feed-scroll { overflow-y: auto; flex-grow: 1; padding: 10px; scrollbar-width: thin; }
-.earthquake-node { background: rgba(255,255,255,0.02); border: 1px solid var(--border-ui); border-radius: 10px; padding: 12px; margin-bottom: 10px; position: relative; display: grid; grid-template-columns: 45px 1fr; gap: 10px; cursor: pointer; transition: 0.3s; }
-.earthquake-node:hover { background: rgba(0, 210, 255, 0.05); transform: translateX(-3px); }
-
-/* --- YILDIZLAR --- */
-body.light-mode .app-container::before {
-    content: ""; position: absolute; width: 250%; height: 250%; top: -75%; left: -75%;
-    background-image: radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)), radial-gradient(1.5px 1.5px at 100px 150px, #ffffff, rgba(0,0,0,0));
-    background-size: 400px 400px; animation: starRotation 200s linear infinite; opacity: 0.3; z-index: 0; pointer-events: none;
-}
-@keyframes starRotation { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-/* --- RESPONSIVE --- */
-@media (max-width: 1024px) {
-    body { overflow-y: auto; height: auto; }
-    .app-container { display: flex; flex-direction: column; height: auto; }
-    #map { position: sticky; top: 0; height: 50vh; width: 100%; z-index: 10; border-bottom: 1px solid var(--border-ui); }
-    .sidebar { position: relative; width: 100% !important; padding: 10px; pointer-events: auto; }
-    .feed-sidebar { border-left: none; background: var(--bg-main); }
+.depth-viz-container {
+    height: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    margin-top: 5px;
+    border: 1px solid var(--border-ui);
 }
 
