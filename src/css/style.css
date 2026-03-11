@@ -285,27 +285,66 @@ body {
 }
 
 /* DAR MOBİL EKRANLAR (Dikey Sıralama) */
+/* Alt Menü Varsayılan Olarak Gizli (Masaüstü/Tablet) */
+.mobile-nav {
+    display: none;
+}
+
+/* DAR MOBİL EKRANLAR (Sekmeli Mobil Mimari) */
 @media (max-width: 768px) {
     .app-container { 
+        flex-direction: column;
+        height: calc(100vh - var(--header-height) - 60px); /* Alt menü için 60px alan ayrıldı */
+    }
+
+    .mobile-nav {
         display: flex;
-        flex-direction: column; 
+        justify-content: space-around;
+        align-items: center;
+        background: var(--bg-panel);
+        border-top: 1px solid var(--border-ui);
+        height: 60px;
+        width: 100%;
+        z-index: 2000;
+        flex-shrink: 0;
+        padding-bottom: env(safe-area-inset-bottom);
     }
-    
-    #map { height: 40vh !important; flex-shrink: 0; }
-    
-    .control-sidebar { 
-        width: 100% !important; 
-        max-height: 25vh !important; 
-        border-right: none; 
-        border-bottom: 1px solid var(--border-ui); 
+
+    .nav-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        width: 33%;
     }
-    
-    .feed-sidebar { 
-        width: 100% !important; 
-        flex-grow: 1; 
-        min-height: 0; 
+
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn .icon { font-size: 18px; }
+    .nav-btn .label { font-size: 10px; font-weight: 600; }
+
+    /* Panelleri Tam Ekran Yap ve Sadece Aktif Olanı Göster */
+    #map, .control-sidebar, .feed-sidebar {
+        display: none !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border: none !important;
+        order: unset !important;
     }
+
+    /* JavaScript tarafından tetiklenecek görünürlük sınıfları */
+    #map.mobile-active { display: block !important; }
+    .control-sidebar.mobile-active { display: flex !important; }
+    .feed-sidebar.mobile-active { display: flex !important; }
+
+    .map-legend { display: none; }
 }
+
 
 /* MİNİ EKRANLAR İÇİN FONT OPTİMİZASYONU */
 @media (max-width: 480px) {
