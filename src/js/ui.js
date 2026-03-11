@@ -99,12 +99,17 @@ export const UIController = {
     },
 
     getMagColor(mag) {
-    if (mag <= 3.0) return '#4caf50'; // Mikro/Küçük - Standart Yeşil
-    if (mag <= 4.5) return '#fceb5e'; // Hafif - Parlak Sarı
-    if (mag <= 5.9) return '#ff9100'; // Orta - Turuncu
-    if (mag <= 6.9) return '#ff1744'; // Güçlü - Kırmızı
-    return '#9c27b0';                // Büyük/Yıkıcı - Mor
+    if (mag < 2.0) return '#D3D3D3'; // Mikro
+    if (mag < 3.0) return '#0000FF'; // Çok Küçük
+    if (mag < 4.0) return '#00FF00'; // Küçük
+    if (mag < 5.0) return '#FFFF00'; // Hafif
+    if (mag < 6.0) return '#FFA500'; // Orta
+    if (mag < 7.0) return '#FF8C00'; // Şiddetli
+    if (mag < 8.0) return '#FF0000'; // Çok Şiddetli
+    if (mag < 9.0) return '#8B0000'; // Büyük
+    return '#4b0082';                // Muazzam
 }
+
 
 
 };
