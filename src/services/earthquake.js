@@ -5,15 +5,24 @@ export const EarthquakeService = {
         { id: 'GFZ', url: 'https://geofon.gfz-potsdam.de/eqinfo/list.php?fmt=geojson' }
     ],
 
+    // Servis bazlı durum takibi için yeni nesne
+    serviceStatus: {},
+
     async fetchAndProcess() {
         const results = await Promise.allSettled(this.endpoints.map(async (e) => {
             try {
                 const response = await fetch(e.url);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 const data = await response.json();
+                
+                // Başarılı servis işaretleme
+                this.serviceStatus[e.id] = { online: true, lastUpdate: Date.now() };
+                
                 return { id: e.id, data };
             } catch (err) {
-                console.error(`Service Fetch Error [${e.id}]:`, err);
+                // Hatalı servis işaretleme
+                this.serviceStatus[e.id] = { online: false, error: err.message };
+                console.error(`Service Offline [${e.id}]:`, err.message);
                 return null;
             }
         }));
@@ -31,7 +40,8 @@ export const EarthquakeService = {
             type: 'FeatureCollection',
             metadata: {
                 generated: Date.now(),
-                count: cleanData.length
+                count: cleanData.length,
+                services: this.serviceStatus // UI'da göstermek için servis durumlarını ekledik
             },
             features: cleanData.map(eq => ({
                 type: 'Feature',
@@ -42,7 +52,7 @@ export const EarthquakeService = {
                 },
                 properties: { 
                     ...eq,
-                    mag: parseFloat(eq.mag) // Sayısal karşılaştırma için float zorlaması
+                    mag: parseFloat(eq.mag)
                 }
             }))
         };
@@ -64,12 +74,10 @@ export const EarthquakeService = {
                 depth = p.depth || 0;
             }
 
-            const magType = p.magType || p.magnitudeType || 'U';
-
             return {
                 id: String(p.unid || p.ids || p.id || `${source}-${p.time}-${lon}`),
                 mag: parseFloat(p.mag || p.magnitude || 0).toFixed(1),
-                magType: magType.toUpperCase(),
+                magType: (p.magType || p.magnitudeType || 'U').toUpperCase(),
                 depth: parseFloat(Math.abs(depth).toFixed(2)),
                 place: (p.place || p.region || p.flynn_region || "BÖLGE TANIMLANAMADI").toUpperCase().trim(),
                 time: p.time ? new Date(p.time).getTime() : (p.m_time ? new Date(p.m_time).getTime() : Date.now()),
@@ -81,7 +89,7 @@ export const EarthquakeService = {
     },
 
     getHaversineDistance(coords1, coords2) {
-        const R = 6371; // Dünya yarıçapı (km)
+        const R = 6371;
         const dLat = (coords2[1] - coords1[1]) * Math.PI / 180;
         const dLon = (coords2[0] - coords1[0]) * Math.PI / 180;
         const a = Math.sin(dLat/2) ** 2 +
@@ -90,7 +98,6 @@ export const EarthquakeService = {
     },
 
     deduplicate(events) {
-        // En büyük depremi referans almak için azalan sıralama
         const sorted = [...events].sort((a, b) => b.mag - a.mag);
         const unique = [];
 
@@ -98,7 +105,6 @@ export const EarthquakeService = {
             const isDup = unique.some(ex => {
                 const tDiff = Math.abs(current.time - ex.time);
                 const sDiff = this.getHaversineDistance(current.coordinates, ex.coordinates);
-                // 60 saniye ve 50km altındaki kayıtlar mükerrer kabul edilir
                 return tDiff < 60000 && sDiff < 50;
             });
             if (!isDup) unique.push(current);
