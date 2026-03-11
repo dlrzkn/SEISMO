@@ -54,7 +54,7 @@ export const MapEngine = {
             layout: { 'visibility': 'none' }
         });
 
-        // 2. Sismik Yoğunluk Analizi (Heatmap) - Seçimli Katman
+        // 2. Heatmap Katmanı
         this.map.addLayer({
             id: 'earthquakes-heat',
             type: 'heatmap',
@@ -62,19 +62,8 @@ export const MapEngine = {
             maxzoom: 9,
             layout: { 'visibility': 'none' },
             paint: {
-                // Büyüklüğe göre ağırlıklandırma
-                'heatmap-weight': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    0, 0,
-                    7, 1
-                ],
-                // Global yoğunluk
-                'heatmap-intensity': [
-                    'interpolate', ['linear'], ['zoom'],
-                    0, 1,
-                    9, 3
-                ],
-                // Profesyonel Skala: Şeffaf -> Mavi -> Sarı -> Kırmızı
+                'heatmap-weight': ['interpolate', ['linear'], ['get', 'mag'], 0, 0, 7, 1],
+                'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 9, 3],
                 'heatmap-color': [
                     'interpolate', ['linear'], ['heatmap-density'],
                     0, 'rgba(33,102,172,0)',
@@ -84,20 +73,12 @@ export const MapEngine = {
                     0.8, 'rgb(239,138,98)',
                     1, 'rgb(178,24,43)'
                 ],
-                'heatmap-radius': [
-                    'interpolate', ['linear'], ['zoom'],
-                    0, 2,
-                    9, 20
-                ],
-                'heatmap-opacity': [
-                    'interpolate', ['linear'], ['zoom'],
-                    7, 1,
-                    9, 0
-                ]
+                'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 2, 9, 20],
+                'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0]
             }
         });
 
-        // 3. Özel Şiddetli Glow Katmanları (7, 8, 9)
+        // 3. Şiddetli Glow Katmanları
         const glowLevels = [
             { id: 'glow-7', mag: 7.0, color: '#FF0000', blur: 1.0, opacity: 0.4, radBase: 20 },
             { id: 'glow-8', mag: 8.0, color: '#8B0000', blur: 1.5, opacity: 0.6, radBase: 35 },
@@ -120,7 +101,7 @@ export const MapEngine = {
             });
         });
 
-        // 4. Genel Sismik Bloom (Depth-Sensitive)
+        // 4. Genel Sismik Bloom
         this.map.addLayer({
             id: 'earthquake-glow',
             type: 'circle',
@@ -137,11 +118,7 @@ export const MapEngine = {
                     5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
                 'circle-opacity': 0.15,
-                'circle-blur': [
-                    'interpolate', ['linear'], ['get', 'depth'],
-                    0, 0.5,
-                    150, 2.0
-                ]
+                'circle-blur': ['interpolate', ['linear'], ['get', 'depth'], 0, 0.5, 150, 2.0]
             }
         });
 
@@ -161,67 +138,57 @@ export const MapEngine = {
                     0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
                     5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
-                'circle-opacity': [
-                    'interpolate', ['linear'], ['zoom'],
-                    2, 0.65,
-                    10, 0.9
-                ],
+                'circle-opacity': ['interpolate', ['linear'], ['zoom'], 2, 0.65, 10, 0.9],
                 'circle-stroke-width': 1,
                 'circle-stroke-color': 'rgba(255,255,255,0.3)',
-                'circle-pitch-alignment': 'map',
-                'circle-stroke-opacity': [
-                    'interpolate', ['linear'], ['get', 'depth'],
-                    0, 0.8,
-                    150, 0.2
-                ]
+                'circle-pitch-alignment': 'map'
             }
         });
     },
 
-   setupInteraction() {
-    this.map.on('click', 'earthquake-points', (e) => {
-        const p = e.features[0].properties;
-        const coords = e.features[0].geometry.coordinates;
-        const dateObj = new Date(p.time);
+    setupInteraction() {
+        this.map.on('click', 'earthquake-points', (e) => {
+            const p = e.features[0].properties;
+            const coords = e.features[0].geometry.coordinates;
+            const dateObj = new Date(p.time);
 
-        new mapboxgl.Popup({ offset: 15, className: 'seismo-popup' })
-            .setLngLat(coords)
-            .setHTML(`
-                <div class="popup-main">
-                    <div class="popup-header-block">
-                        <span class="popup-source-tag">${p.source}</span>
-                        <div class="popup-mag-block">
-                            <span class="popup-mag-value">${parseFloat(p.mag).toFixed(1)}</span>
-                            <small>Mw</small>
+            new mapboxgl.Popup({ offset: 15, className: 'seismo-popup' })
+                .setLngLat(coords)
+                .setHTML(`
+                    <div class="popup-main">
+                        <div class="popup-header-block">
+                            <span class="popup-source-tag">${p.source || 'VERİ KAYNAĞI'}</span>
+                            <div class="popup-mag-block">
+                                <span class="popup-mag-value">${parseFloat(p.mag).toFixed(1)}</span>
+                                <small>Mw</small>
+                            </div>
+                        </div>
+                        <div class="popup-place-block">${p.place}</div>
+                        <div class="popup-data-grid">
+                            <div class="data-node">
+                                <div class="data-node-label">DERİNLİK</div>
+                                <div class="data-node-value">${parseFloat(p.depth).toFixed(1)} KM</div>
+                            </div>
+                            <div class="data-node">
+                                <div class="data-node-label">TARİH</div>
+                                <div class="data-node-value">${dateObj.toLocaleDateString('tr-TR')}</div>
+                            </div>
+                            <div class="data-node">
+                                <div class="data-node-label">SAAT (TSI)</div>
+                                <div class="data-node-value">${dateObj.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}</div>
+                            </div>
+                            <div class="data-node">
+                                <div class="data-node-label">KOORDİNAT</div>
+                                <div class="data-node-value">${coords[1].toFixed(2)}N / ${coords[0].toFixed(2)}E</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px; border-top: 1px solid rgba(0,210,255,0.1); padding-top: 10px;">
+                            <a href="${p.url}" target="_blank" class="popup-link-btn">DETAYLI ANALİZ ↗</a>
                         </div>
                     </div>
-                    <div class="popup-place-block">${p.place}</div>
-                    <div class="popup-data-grid">
-                        <div class="data-node">
-                            <div class="data-node-label">DERİNLİK</div>
-                            <div class="data-node-value">${parseFloat(p.depth).toFixed(1)} KM</div>
-                        </div>
-                        <div class="data-node">
-                            <div class="data-node-label">TARİH</div>
-                            <div class="data-node-value">${dateObj.toLocaleDateString('tr-TR')}</div>
-                        </div>
-                        <div class="data-node">
-                            <div class="data-node-label">SAAT (TSI)</div>
-                            <div class="data-node-value">${dateObj.toLocaleTimeString('tr-TR')}</div>
-                        </div>
-                        <div class="data-node">
-                            <div class="data-node-label">KOORDİNAT</div>
-                            <div class="data-node-value">${coords[1].toFixed(2)}N / ${coords[0].toFixed(2)}E</div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 10px; border-top: 1px solid rgba(0,210,255,0.1); padding-top: 10px;">
-                        <a href="${p.url}" target="_blank" class="popup-link-btn">DETAYLI ANALİZ ↗</a>
-                    </div>
-                </div>
-            `)
-            .addTo(this.map);
-    });
-
+                `)
+                .addTo(this.map);
+        });
 
         this.map.on('mouseenter', 'earthquake-points', () => { this.map.getCanvas().style.cursor = 'pointer'; });
         this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
@@ -229,11 +196,11 @@ export const MapEngine = {
 
     setupAtmosphere() {
         this.map.setFog({
-            'range': [0.5, 10],
-            'color': '#0a0c10',
-            'high-color': '#161c24',
-            'space-color': '#000000',
-            'star-intensity': 0.2
+            'range': [1, 10],
+            'color': '#0b1426',       // style.css'deki --bg-main ile uyumlu
+            'high-color': '#162235',  // Atmosferik geçiş
+            'space-color': '#000000', // Uzay derinliği
+            'star-intensity': 0.15    // Mapbox yıldızlarını azalttık (CSS yıldızları için yer açtık)
         });
     },
 
