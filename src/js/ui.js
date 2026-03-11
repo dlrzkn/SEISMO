@@ -11,15 +11,23 @@ export const UIController = {
         clock: document.getElementById('clock')
     },
 
-    renderAll(appState) {
+        renderAll(appState) {
         this.renderFeed(appState.filteredEvents);
         this.renderAnalytics(appState.analytics);
+        
+        // Deprem Sayısı
         if (this.els.count) this.els.count.innerText = appState.filteredEvents.length;
+        
+        // Enerji Değeri (TJ)
+        if (this.els.energy) this.els.energy.innerText = `${appState.analytics.totalEnergyTJ} TJ`;
+        
+        // Zaman Etiketi (1S, 24S, 7G)
         if (this.els.energyTimerange) {
             const labels = { 'hour': '1S', 'day': '24S', 'week': '7G' };
             this.els.energyTimerange.innerText = labels[appState.filters.timeRange];
         }
     },
+
 
     // SAĞ LİSTE: Senin o sevdiğin dikey badge tasarımı
     renderFeed(events) {
