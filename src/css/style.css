@@ -173,9 +173,38 @@ body {
 .depth-bar-deep { height: 100%; background: var(--accent); transition: width 0.8s ease; }
 
 /* DEPREM LİSTESİ KUTULARI */
-.earthquake-node { background: rgba(255,255,255,0.02); border: 1px solid var(--border-ui); border-radius: 8px; padding: 12px; margin-bottom: 10px; position: relative; display: grid; grid-template-columns: 45px 1fr; gap: 10px; cursor: pointer; transition: transform 0.2s; }
-.earthquake-node:hover { background: rgba(0, 210, 255, 0.08); transform: translateX(-3px); border-color: rgba(0, 210, 255, 0.3); }
-.source-tag { position: absolute; top: 0; right: 0; font-size: 7px; padding: 3px 6px; background: var(--border-ui); border-bottom-left-radius: 6px; font-weight: 800; }
+/* DEPREM LİSTESİ KUTULARI */
+.earthquake-node { 
+    background: rgba(255,255,255,0.02); 
+    border: 1px solid var(--border-ui); 
+    border-radius: 8px; 
+    padding: 12px; 
+    margin-bottom: 10px; 
+    position: relative; 
+    display: flex; 
+    align-items: center;
+    gap: 15px; 
+    cursor: pointer; 
+    transition: transform 0.2s; 
+}
+.earthquake-node > * {
+    min-width: 0;
+}
+.earthquake-node:hover { 
+    background: rgba(0, 210, 255, 0.08); 
+    transform: translateX(-3px); 
+    border-color: rgba(0, 210, 255, 0.3); 
+}
+.source-tag { 
+    position: absolute; 
+    top: 0; 
+    right: 0; 
+    font-size: 7px; 
+    padding: 3px 6px; 
+    background: var(--border-ui); 
+    border-bottom-left-radius: 6px; 
+    font-weight: 800; 
+}
 
 .feed-controls { display: flex; gap: 5px; }
 .sort-btn { background: transparent; border: 1px solid var(--border-ui); color: var(--text-secondary); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
