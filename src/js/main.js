@@ -34,10 +34,10 @@ const App = {
             this.state.map = await MapEngine.init(config);
             this.attachEventListeners();
             
-            // İlk döngü
-            await this.dataCycle();
+            // Lokasyon tespiti ve başlangıç görünüm ayarı
+            this.locateUserAndFly();
             
-            // 2 dakikalık periyotlarla akıllı güncelleme
+            await this.dataCycle();
             setInterval(() => this.dataCycle(), 120000);
             
         } catch (err) {
@@ -46,17 +46,48 @@ const App = {
         }
     },
 
+    locateUserAndFly() {
+        // Harita başlangıç zoom seviyesini küçült (uzaklaştır)
+        this.state.map.setZoom(1.5);
+
+        // Geolocation API ile kullanıcının konumunu tespit et
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { longitude, latitude } = position.coords;
+                // Kullanıcının konumuna animasyonlu geçiş
+                this.state.map.flyTo({
+                    center: [longitude, latitude],
+                    zoom: 3.8,
+                    duration: 4000,
+                    essential: true
+                });
+            }, () => {
+                // İzin reddedilirse veya hata oluşursa varsayılan konuma (Türkiye) uç
+                this.state.map.flyTo({
+                    center: [35.2433, 38.9637],
+                    zoom: 3.8,
+                    duration: 4000
+                });
+            });
+        } else {
+            // Tarayıcı desteklemiyorsa varsayılan konuma uç
+            this.state.map.flyTo({
+                center: [35.2433, 38.9637],
+                zoom: 3.8,
+                duration: 4000
+            });
+        }
+    },
+
     async dataCycle() {
         UIController.updateStatus("TARANIYOR...");
         try {
             const geojson = await EarthquakeService.fetchAndProcess();
             
-            // Servis durumlarını analiz et
             this.state.analytics.activeServices = Object.entries(geojson.metadata.services)
                 .filter(([_, status]) => status.online)
                 .map(([id, _]) => id);
 
-            // Veriyi normalize ederek sakla
             this.state.rawEvents = geojson.features.map(f => ({
                 ...f.properties,
                 coordinates: f.geometry.coordinates.slice(0, 2),
@@ -65,7 +96,6 @@ const App = {
 
             this.applyFilters();
 
-            // Durum çubuğuna servis detaylarını yansıt
             const statusMsg = this.state.analytics.activeServices.length > 0 
                 ? `SİNYAL: ${this.state.analytics.activeServices.join(' + ')}`
                 : "VERİ YOK";
@@ -111,7 +141,6 @@ const App = {
             ? ((shallowCount / this.state.filteredEvents.length) * 100).toFixed(1) 
             : 0;
 
-        // YENİ EKLENEN: Enerji UI Güncellemesi (Zamana göre dinamik)
         const energyEl = document.getElementById('energy-total-tj');
         const timeLabelEl = document.getElementById('energy-time-label');
         if (energyEl) energyEl.innerText = this.state.analytics.totalEnergyTJ;
@@ -139,7 +168,6 @@ const App = {
     },
 
     attachEventListeners() {
-        // Magnitude Slider
         document.getElementById('mag-slider')?.addEventListener('input', (e) => {
             const val = parseFloat(e.target.value);
             this.state.filters.minMag = val;
@@ -147,7 +175,6 @@ const App = {
             this.applyFilters();
         });
 
-        // Zaman ve Derinlik Filtreleri
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const { time, depth } = e.target.dataset;
@@ -158,7 +185,6 @@ const App = {
             });
         });
 
-        // Levha Sınırları Toggle
         document.getElementById('plate-boundaries')?.addEventListener('change', (e) => {
             const visibility = e.target.checked ? 'visible' : 'none';
             if (this.state.map?.getLayer('plates-layer')) {
@@ -166,7 +192,6 @@ const App = {
             }
         });
 
-        // Isı Haritası (Heatmap) Toggle
         document.getElementById('heatmap-toggle')?.addEventListener('change', (e) => {
             const visibility = e.target.checked ? 'visible' : 'none';
             if (this.state.map?.getLayer('earthquakes-heat')) {
@@ -174,18 +199,15 @@ const App = {
             }
         });
 
-        // YENİ UÇUŞ VE POP-UP SİMÜLASYON MOTORU
         window.focusEvent = (coords) => {
             if (!this.state.map) return;
             
-            // 1. Alt Paneli Otomatik Kapat ve Harita Sekmesine Geç
             const mapBtn = document.querySelector('.nav-btn[data-target="map"]');
             if(mapBtn && !mapBtn.classList.contains('active')) {
                 mapBtn.click();
             }
-            document.body.classList.remove('show-layers'); // Katmanlar açıksa kapat
+            document.body.classList.remove('show-layers'); 
 
-            // 2. Depremin Olduğu Yere Uç
             this.state.map.flyTo({ 
                 center: coords, 
                 zoom: 8, 
@@ -193,14 +215,12 @@ const App = {
                 essential: true 
             });
 
-            // 3. Uçuş Bittiğinde Otomatik Tıklama Simülasyonu (Pop-up'ı açmak için)
             this.state.map.once('moveend', () => {
                 const point = this.state.map.project(coords);
                 this.state.map.fire('click', { lngLat: { lng: coords[0], lat: coords[1] }, point: point });
             });
         };
 
-        // Mobil Alt Menü Navigasyonu
         this.setupMobileNavigation();
     },
 
@@ -208,7 +228,6 @@ const App = {
         const navButtons = document.querySelectorAll('.nav-btn');
         const body = document.body;
 
-        // Başlangıç durumu: Uygulama ilk açıldığında harita aktif olsun
         if (window.innerWidth <= 1024) {
             body.classList.add('tab-map');
         }
@@ -219,35 +238,27 @@ const App = {
                 const target = currentBtn.getAttribute('data-target');
                 const isAlreadyActive = currentBtn.classList.contains('active');
 
-                // 1. Tıklanan sekme "Harita" ise
                 if (target === 'map') {
                     if (isAlreadyActive) {
-                        // Haritadayken bir daha basarsa Katman panelini aç/kapat
                         body.classList.toggle('show-layers');
                     } else {
-                        // Temiz haritaya geç
                         body.classList.remove('tab-analysis', 'tab-list', 'show-layers');
                         body.classList.add('tab-map');
                     }
                 } 
-                // 2. Tıklanan sekme "Analiz" veya "Liste" ise
                 else {
                     if (isAlreadyActive) {
-                        // Açık olan panele tekrar basıldı, kapat ve haritaya dön
                         document.querySelector('.nav-btn[data-target="map"]').click();
                         return;
                     } else {
-                        // İlgili sekmeyi aç
                         body.classList.remove('tab-map', 'tab-analysis', 'tab-list', 'show-layers');
                         body.classList.add(`tab-${target}`);
                     }
                 }
 
-                // Aktif buton görselini güncelle
                 navButtons.forEach(b => b.classList.remove('active'));
                 currentBtn.classList.add('active');
 
-                // Mapbox haritasının boyutlarını güncelle (gri ekran hatasını önler)
                 if (this.state.map) {
                     setTimeout(() => {
                         this.state.map.resize();
@@ -267,4 +278,3 @@ const App = {
 };
 
 App.init();
-
