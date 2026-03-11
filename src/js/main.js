@@ -23,7 +23,6 @@ const App = {
     },
 
     async init() {
-        // Saati her şeyden önce başlat (Arayüzün yaşadığını görelim)
         this.startClock();
         
         const config = {
@@ -31,18 +30,10 @@ const App = {
         };
 
         try {
-            // 1. Haritayı Başlat
             this.state.map = await MapEngine.init(config);
-            
-            // 2. Olay Dinleyicileri Kur
             this.attachEventListeners();
-
-            // 3. İlk Veriyi Çek ve İşle
             await this.dataCycle();
-
-            // Periyodik Güncelleme (2 dk)
             setInterval(() => this.dataCycle(), 120000);
-
         } catch (err) {
             console.error("Uygulama başlatma hatası:", err);
             UIController.updateStatus("SİSTEM HATASI");
@@ -54,7 +45,6 @@ const App = {
         try {
             const geojson = await EarthquakeService.fetchAndProcess();
             this.state.rawEvents = geojson.features.map(f => f.properties);
-            
             this.applyFilters();
             UIController.updateStatus("GÜÇLÜ");
         } catch (err) {
@@ -96,7 +86,6 @@ const App = {
     },
 
     syncUI() {
-        // Haritayı Güncelle
         MapEngine.updateSource('earthquakes', {
             type: 'FeatureCollection',
             features: this.state.filteredEvents.map(ev => ({
@@ -105,8 +94,6 @@ const App = {
                 properties: ev
             }))
         });
-
-        // Arayüzü Güncelle (Yeni state yapısına göre)
         UIController.renderAll(this.state);
     },
 
@@ -130,17 +117,18 @@ const App = {
             });
         });
 
-        window.focusEvent = (coords) => {
-            this.state.map.flyTo({ center: coords, zoom: 8, duration: 2500, essential: true });
-        };
-    },
-        // Plaka Sınırları Toggle (Aç/Kapat)
+        // Plaka Sınırları Toggle (Artık doğru yerde!)
         document.getElementById('plate-boundaries')?.addEventListener('change', (e) => {
             const visibility = e.target.checked ? 'visible' : 'none';
             if (this.state.map.getLayer('plates-layer')) {
                 this.state.map.setLayoutProperty('plates-layer', 'visibility', visibility);
             }
         });
+
+        window.focusEvent = (coords) => {
+            this.state.map.flyTo({ center: coords, zoom: 8, duration: 2500, essential: true });
+        };
+    },
 
     startClock() {
         setInterval(() => {
