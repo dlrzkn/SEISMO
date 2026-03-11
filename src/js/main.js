@@ -56,7 +56,7 @@ const App = {
             this.state.rawEvents = geojson.features.map(f => f.properties);
             
             this.applyFilters();
-            UIController.updateStatus("GÜÇLÜ SİNYAL");
+            UIController.updateStatus("GÜÇLÜ");
         } catch (err) {
             UIController.updateStatus("BAĞLANTI KESİLDİ");
         }
