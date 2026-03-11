@@ -30,7 +30,6 @@ export const UIController = {
     renderFeed(events) {
         if (!this.els.feed) return;
         
-        // Performans: DOM manipülasyonu öncesi fragment oluşturma
         const fragment = document.createDocumentFragment();
         this.els.feed.innerHTML = '';
 
@@ -67,15 +66,17 @@ export const UIController = {
     renderAnalytics(analytics) {
         if (!this.els.analysis) return;
         const ratio = parseFloat(analytics.shallowRatio) || 0;
+        const deepRatio = (100 - ratio).toFixed(1);
         
+        // Yerleşim bozukluğunu gidermek için flex-justify eklendi
         this.els.analysis.innerHTML = `
-            <div class="analysis-header">
-                <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
-                <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
+            <div class="analysis-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <span style="color: #ff4d4d; font-weight: 800; font-size: 10px;">SIĞ: %${ratio}</span>
+                <span style="color: #00d2ff; font-weight: 800; font-size: 10px;">DERİN: %${deepRatio}</span>
             </div>
-            <div class="depth-viz-container">
-                <div class="depth-bar-shallow" style="width: ${ratio}%;"></div>
-                <div class="depth-bar-deep" style="width: ${100 - ratio}%;"></div>
+            <div class="depth-viz-container" style="display: flex; height: 6px; background: rgba(255,255,255,0.05); border-radius: 4px; overflow: hidden;">
+                <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; transition: width 0.5s ease;"></div>
+                <div class="depth-bar-deep" style="width: ${deepRatio}%; background: #00d2ff; transition: width 0.5s ease;"></div>
             </div>
         `;
     },
@@ -99,17 +100,14 @@ export const UIController = {
     },
 
     getMagColor(mag) {
-    if (mag < 2.0) return '#D3D3D3'; // Mikro
-    if (mag < 3.0) return '#0000FF'; // Çok Küçük
-    if (mag < 4.0) return '#00FF00'; // Küçük
-    if (mag < 5.0) return '#FFFF00'; // Hafif
-    if (mag < 6.0) return '#FFA500'; // Orta
-    if (mag < 7.0) return '#FF8C00'; // Şiddetli
-    if (mag < 8.0) return '#FF0000'; // Çok Şiddetli
-    if (mag < 9.0) return '#8B0000'; // Büyük
-    return '#4b0082';                // Muazzam
-}
-
-
-
+        if (mag < 2.0) return '#D3D3D3';
+        if (mag < 3.0) return '#0000FF';
+        if (mag < 4.0) return '#00FF00';
+        if (mag < 5.0) return '#FFFF00';
+        if (mag < 6.0) return '#FFA500';
+        if (mag < 7.0) return '#FF8C00';
+        if (mag < 8.0) return '#FF0000';
+        if (mag < 9.0) return '#8B0000';
+        return '#4b0082';
+    }
 };
