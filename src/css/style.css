@@ -140,10 +140,38 @@ body {
 
 /* --- RESPONSIVE (SCROLL DÜZELTİLDİ) --- */
 @media (max-width: 1024px) {
-    body { height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-    .app-container { display: flex; flex-direction: column; height: calc(100vh - var(--header-height)); overflow: hidden; }
-    #map { position: relative; height: 35vh; width: 100%; flex-shrink: 0; }
-    .sidebar { position: relative; width: 100% !important; height: auto; padding: 10px; pointer-events: auto; }
-    .feed-sidebar { position: relative; flex-grow: 1; border-left: none; border-top: 1px solid var(--border-ui); height: auto; min-height: 0; }
-    .feed-scroll { height: 100%; overflow-y: auto; }
+    body { 
+        height: 100vh; 
+        overflow: hidden; 
+        display: flex; 
+        flex-direction: column; 
+    }
+
+    .app-container { 
+        flex-direction: column; 
+        height: calc(100vh - var(--header-height)); 
+    }
+
+    #map { 
+        height: 45%; /* Haritaya sabit oran ver */
+        width: 100%; 
+        position: relative; 
+    }
+
+    .sidebar { 
+        position: relative; 
+        width: 100% !important; 
+        height: auto; 
+        max-height: 55%; /* Geri kalan alan panellere */
+        overflow-y: auto; 
+        display: block; /* Flex yerine blok yaparak taşmayı önle */
+        pointer-events: auto;
+    }
+
+    .feed-sidebar { 
+        width: 100% !important; 
+        height: 300px; /* Liste için sabit bir alan ayır */
+        border-left: none; 
+        border-top: 1px solid var(--border-ui); 
+    }
 }
