@@ -53,23 +53,19 @@ export const UIController = {
     },
 
     // DERİNLİK ANALİZİ: Kırmızı/Mavi Bar Tasarımı
-    renderAnalytics(analytics) {
-        if (this.els.energy) this.els.energy.innerText = `${analytics.totalEnergyTJ} TJ`;
-        
-        if (this.els.analysis) {
-            const ratio = parseFloat(analytics.shallowRatio);
-            this.els.analysis.innerHTML = `
-                <div style="display: flex; justify-content: space-between; font-size: 10px; margin-bottom: 5px; font-weight: 700;">
-                    <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
-                    <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
-                </div>
-                <div class="depth-viz-container">
-                    <div class="depth-bar" style="width: ${ratio}%; background: #ff4d4d;"></div>
-                    <div class="depth-bar" style="width: ${100 - ratio}%; background: #00d2ff;"></div>
-                </div>
-            `;
-        }
-    },
+renderAnalytics(analytics) {
+    const ratio = analytics.shallowRatio;
+    this.els.analysis.innerHTML = `
+        <div class="analysis-header" style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 5px; font-weight: 700;">
+            <span style="color: #ff4d4d">SIĞ: %${ratio}</span>
+            <span style="color: #00d2ff">DERİN: %${(100 - ratio).toFixed(1)}</span>
+        </div>
+        <div class="depth-viz-container" style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; display: flex;">
+            <div class="depth-bar-shallow" style="width: ${ratio}%; background: #ff4d4d; height: 100%;"></div>
+            <div class="depth-bar-deep" style="width: ${100 - ratio}%; background: #00d2ff; height: 100%;"></div>
+        </div>
+    `;
+},
 
     updateMagValue(val) {
         if (this.els.magValue) this.els.magValue.innerText = `${parseFloat(val).toFixed(1)} Mw`;
