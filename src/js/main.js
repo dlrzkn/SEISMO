@@ -30,12 +30,19 @@ const App = {
         };
 
         try {
+            // Map Engine başlatma ve state'e atama
             this.state.map = await MapEngine.init(config);
+            
             this.attachEventListeners();
+            
+            // İlk veri çekme işlemi
             await this.dataCycle();
+            
+            // 2 dakikalık periyotlarla güncelleme (120000ms)
             setInterval(() => this.dataCycle(), 120000);
+            
         } catch (err) {
-            console.error("Uygulama başlatma hatası:", err);
+            console.error("Sistem Başlatma Hatası:", err);
             UIController.updateStatus("SİSTEM HATASI");
         }
     },
@@ -44,10 +51,18 @@ const App = {
         UIController.updateStatus("TARANIYOR...");
         try {
             const geojson = await EarthquakeService.fetchAndProcess();
-            this.state.rawEvents = geojson.features.map(f => f.properties);
+            
+            // Sadece gerekli property'leri state'e aktararak bellek kullanımını minimize etme
+            this.state.rawEvents = geojson.features.map(f => ({
+                ...f.properties,
+                coordinates: f.geometry.coordinates.slice(0, 2), // [lng, lat]
+                depth: f.geometry.coordinates[2] || 0
+            }));
+
             this.applyFilters();
             UIController.updateStatus("GÜÇLÜ");
         } catch (err) {
+            console.error("Veri Döngüsü Hatası:", err);
             UIController.updateStatus("BAĞLANTI KESİLDİ");
         }
     },
@@ -60,9 +75,11 @@ const App = {
         this.state.filteredEvents = this.state.rawEvents.filter(ev => {
             const mMatch = ev.mag >= minMag;
             const tMatch = (now - ev.time) <= timeLimits[timeRange];
+            
             let dMatch = true;
             if (depthFilter === 'shallow') dMatch = ev.depth < this.state.settings.shallowLimit;
-            if (depthFilter === 'deep') dMatch = ev.depth >= this.state.settings.shallowLimit;
+            else if (depthFilter === 'deep') dMatch = ev.depth >= this.state.settings.shallowLimit;
+            
             return mMatch && tMatch && dMatch;
         });
 
@@ -75,6 +92,7 @@ const App = {
         let shallowCount = 0;
 
         this.state.filteredEvents.forEach(eq => {
+            // Richter - Joule Dönüşümü: E = 10^(4.8 + 1.5M)
             totalJoules += Math.pow(10, 4.8 + (1.5 * eq.mag));
             if (eq.depth < this.state.settings.shallowLimit) shallowCount++;
         });
@@ -86,26 +104,33 @@ const App = {
     },
 
     syncUI() {
+        // Harita kaynağını yeni FeatureCollection ile güncelle
         MapEngine.updateSource('earthquakes', {
             type: 'FeatureCollection',
             features: this.state.filteredEvents.map(ev => ({
                 type: 'Feature',
-                geometry: { type: 'Point', coordinates: [...ev.coordinates, ev.depth] },
+                geometry: { 
+                    type: 'Point', 
+                    coordinates: [...ev.coordinates, ev.depth] 
+                },
                 properties: ev
             }))
         });
+
+        // UI Bileşenlerini render et
         UIController.renderAll(this.state);
     },
 
     attachEventListeners() {
-        // Slider
+        // Magnitude Slider Kontrolü
         document.getElementById('mag-slider')?.addEventListener('input', (e) => {
-            this.state.filters.minMag = parseFloat(e.target.value);
-            UIController.updateMagValue(e.target.value);
+            const val = parseFloat(e.target.value);
+            this.state.filters.minMag = val;
+            UIController.updateMagValue(val);
             this.applyFilters();
         });
 
-        // Filtre Butonları
+        // Zaman ve Derinlik Filtre Butonları
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const { time, depth } = e.target.dataset;
@@ -117,7 +142,7 @@ const App = {
             });
         });
 
-        // Plaka Sınırları Toggle (Artık doğru yerde!)
+        // Tektonik Plaka Katman Kontrolü
         document.getElementById('plate-boundaries')?.addEventListener('change', (e) => {
             const visibility = e.target.checked ? 'visible' : 'none';
             if (this.state.map.getLayer('plates-layer')) {
@@ -125,17 +150,26 @@ const App = {
             }
         });
 
+        // Global Odaklanma Event'i (Listeden haritaya uçuş)
         window.focusEvent = (coords) => {
-            this.state.map.flyTo({ center: coords, zoom: 8, duration: 2500, essential: true });
+            this.state.map.flyTo({ 
+                center: coords, 
+                zoom: 8, 
+                duration: 2500, 
+                essential: true 
+            });
         };
     },
 
     startClock() {
+        const clockEl = document.getElementById('clock');
+        if (!clockEl) return;
+        
         setInterval(() => {
-            const clock = document.getElementById('clock');
-            if (clock) clock.innerText = new Date().toLocaleTimeString('tr-TR');
+            clockEl.innerText = new Date().toLocaleTimeString('tr-TR');
         }, 1000);
     }
 };
 
+// Uygulama Giriş Noktası
 App.init();
