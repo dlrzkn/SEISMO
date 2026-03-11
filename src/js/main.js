@@ -174,12 +174,29 @@ const App = {
             }
         });
 
+        // YENİ UÇUŞ VE POP-UP SİMÜLASYON MOTORU
         window.focusEvent = (coords) => {
-            this.state.map?.flyTo({ 
+            if (!this.state.map) return;
+            
+            // 1. Alt Paneli Otomatik Kapat ve Harita Sekmesine Geç
+            const mapBtn = document.querySelector('.nav-btn[data-target="map"]');
+            if(mapBtn && !mapBtn.classList.contains('active')) {
+                mapBtn.click();
+            }
+            document.body.classList.remove('show-layers'); // Katmanlar açıksa kapat
+
+            // 2. Depremin Olduğu Yere Uç
+            this.state.map.flyTo({ 
                 center: coords, 
                 zoom: 8, 
                 duration: 2500, 
                 essential: true 
+            });
+
+            // 3. Uçuş Bittiğinde Otomatik Tıklama Simülasyonu (Pop-up'ı açmak için)
+            this.state.map.once('moveend', () => {
+                const point = this.state.map.project(coords);
+                this.state.map.fire('click', { lngLat: { lng: coords[0], lat: coords[1] }, point: point });
             });
         };
 
@@ -250,3 +267,4 @@ const App = {
 };
 
 App.init();
+
