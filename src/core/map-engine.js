@@ -40,7 +40,7 @@ export const MapEngine = {
     },
 
     initLayers() {
-        // 1. Levha Sınırları Katmanı
+        // 1. Levha Sınırları
         this.map.addLayer({
             id: 'plates-layer',
             type: 'line',
@@ -54,7 +54,29 @@ export const MapEngine = {
             layout: { 'visibility': 'none' }
         });
 
-        // 2. Glow (Parlama) Katmanı - Bilimsel Yayılım
+        // 2. Özel Şiddetli Glow Katmanları (7, 8, 9)
+        const glowLevels = [
+            { id: 'glow-7', mag: 7.0, color: '#FF0000', blur: 1.0, opacity: 0.4, radBase: 20 },
+            { id: 'glow-8', mag: 8.0, color: '#8B0000', blur: 1.5, opacity: 0.6, radBase: 35 },
+            { id: 'glow-9', mag: 9.0, color: '#4b0082', blur: 2.0, opacity: 0.8, radBase: 50 }
+        ];
+
+        glowLevels.forEach(level => {
+            this.map.addLayer({
+                id: level.id,
+                type: 'circle',
+                source: 'earthquakes',
+                filter: ['>=', ['get', 'mag'], level.mag],
+                paint: {
+                    'circle-radius': ['interpolate', ['exponential', 2], ['zoom'], 1, level.radBase, 10, level.radBase * 5],
+                    'circle-color': level.color,
+                    'circle-opacity': level.opacity,
+                    'circle-blur': level.blur
+                }
+            });
+        });
+
+        // 3. Genel Bilimsel Glow (Dinamik Spektrum)
         this.map.addLayer({
             id: 'earthquake-glow',
             type: 'circle',
@@ -67,16 +89,15 @@ export const MapEngine = {
                 ],
                 'circle-color': [
                     'interpolate', ['linear'], ['get', 'mag'],
-                    2.0, '#00d2ff',
-                    5.5, '#ff9100',
-                    8.0, '#9c27b0'
+                    0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
+                    5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
                 'circle-opacity': 0.15,
                 'circle-blur': 1.5
             }
         });
 
-        // 3. Ana Sismik Noktalar - Richter ve Derinlik Odaklı
+        // 4. Ana Sismik Odak Noktaları
         this.map.addLayer({
             id: 'earthquake-points',
             type: 'circle',
@@ -88,29 +109,16 @@ export const MapEngine = {
                     10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30]
                 ],
                 'circle-color': [
-    'interpolate', ['linear'], ['get', 'mag'],
-    0.0, '#D3D3D3', // Mikro: Açık Gri
-    2.0, '#0000FF', // Çok Küçük: Mavi
-    3.0, '#00FF00', // Küçük: Yeşil
-    4.0, '#FFFF00', // Hafif: Sarı
-    5.0, '#FFA500', // Orta: Turuncu
-    6.0, '#FF8C00', // Şiddetli: Koyu Turuncu
-    7.0, '#FF0000', // Çok Şiddetli: Kırmızı
-    8.0, '#8B0000', // Büyük: Koyu Kırmızı
-    9.0, '#4b0082'  // Muazzam: İndigo/Mor
-],
-
-                'circle-opacity': 0.8,
-                'circle-stroke-width': [
-                    'interpolate', ['linear'], ['zoom'],
-                    1, 0.5,
-                    10, 2
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
+                    5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
                 ],
+                'circle-opacity': 0.8,
+                'circle-stroke-width': ['interpolate', ['linear'], ['zoom'], 1, 0.5, 10, 2],
                 'circle-stroke-color': '#ffffff',
                 'circle-stroke-opacity': [
                     'interpolate', ['linear'], ['get', 'depth'],
-                    0, 0.8,   // Yüzeye yakın: Net
-                    100, 0.2  // Derin: Belirsiz
+                    0, 0.8, 100, 0.2
                 ]
             }
         });
@@ -164,3 +172,4 @@ export const MapEngine = {
         }
     }
 };
+
