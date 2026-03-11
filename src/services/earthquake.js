@@ -40,49 +40,48 @@ export const EarthquakeService = {
                     type: 'Point', 
                     coordinates: [eq.coordinates[0], eq.coordinates[1], eq.depth] 
                 },
-                properties: { ...eq }
+                properties: { 
+                    ...eq,
+                    mag: parseFloat(eq.mag) // Sayısal karşılaştırma için float zorlaması
+                }
             }))
         };
     },
-normalize(data, source) {
-    // Veri kaynağına göre özellikler listesini al (bazı servisler direkt dizi döner)
-    const rawFeatures = data.features || (Array.isArray(data) ? data : []);
-    
-    return rawFeatures.map(f => {
-        const p = f.properties || f;
-        const geom = f.geometry || {};
+
+    normalize(data, source) {
+        const rawFeatures = data.features || (Array.isArray(data) ? data : []);
         
-        // Koordinat ayrıştırma
-        let lon = 0, lat = 0, depth = 0;
-        if (geom.coordinates) {
-            [lon, lat, depth] = geom.coordinates;
-        } else {
-            lon = p.longitude || p.lon || 0;
-            lat = p.latitude || p.lat || 0;
-            depth = p.depth || 0;
-        }
+        return rawFeatures.map(f => {
+            const p = f.properties || f;
+            const geom = f.geometry || {};
+            
+            let lon = 0, lat = 0, depth = 0;
+            if (geom.coordinates) {
+                [lon, lat, depth] = geom.coordinates;
+            } else {
+                lon = p.longitude || p.lon || 0;
+                lat = p.latitude || p.lat || 0;
+                depth = p.depth || 0;
+            }
 
-        const magType = p.magType || p.magnitudeType || 'U';
+            const magType = p.magType || p.magnitudeType || 'U';
 
-        return {
-            id: String(p.unid || p.ids || p.id || `${source}-${p.time}-${lon}`),
-            mag: parseFloat(p.mag || p.magnitude || 0).toFixed(1),
-            magType: magType.toUpperCase(),
-            depth: parseFloat(Math.abs(depth).toFixed(2)),
-            place: (p.place || p.region || p.flynn_region || "BÖLGE TANIMLANAMADI").toUpperCase().trim(),
-            // HATALI KISIM DÜZELTİLDİ: new Error -> new Date
-            time: p.time ? new Date(p.time).getTime() : (p.m_time ? new Date(p.m_time).getTime() : Date.now()),
-            source: source,
-            coordinates: [parseFloat(lon), parseFloat(lat)],
-            url: p.url || (p.uri ? p.uri : "#")
-        };
-    });
-},
-
-
+            return {
+                id: String(p.unid || p.ids || p.id || `${source}-${p.time}-${lon}`),
+                mag: parseFloat(p.mag || p.magnitude || 0).toFixed(1),
+                magType: magType.toUpperCase(),
+                depth: parseFloat(Math.abs(depth).toFixed(2)),
+                place: (p.place || p.region || p.flynn_region || "BÖLGE TANIMLANAMADI").toUpperCase().trim(),
+                time: p.time ? new Date(p.time).getTime() : (p.m_time ? new Date(p.m_time).getTime() : Date.now()),
+                source: source,
+                coordinates: [parseFloat(lon), parseFloat(lat)],
+                url: p.url || (p.uri ? p.uri : "#")
+            };
+        });
+    },
 
     getHaversineDistance(coords1, coords2) {
-        const R = 6371;
+        const R = 6371; // Dünya yarıçapı (km)
         const dLat = (coords2[1] - coords1[1]) * Math.PI / 180;
         const dLon = (coords2[0] - coords1[0]) * Math.PI / 180;
         const a = Math.sin(dLat/2) ** 2 +
@@ -91,7 +90,7 @@ normalize(data, source) {
     },
 
     deduplicate(events) {
-        // En büyük depremi referans almak için azalan sırala
+        // En büyük depremi referans almak için azalan sıralama
         const sorted = [...events].sort((a, b) => b.mag - a.mag);
         const unique = [];
 
@@ -99,7 +98,7 @@ normalize(data, source) {
             const isDup = unique.some(ex => {
                 const tDiff = Math.abs(current.time - ex.time);
                 const sDiff = this.getHaversineDistance(current.coordinates, ex.coordinates);
-                // Bilimsel eşik: 60 saniye ve 50km
+                // 60 saniye ve 50km altındaki kayıtlar mükerrer kabul edilir
                 return tDiff < 60000 && sDiff < 50;
             });
             if (!isDup) unique.push(current);
@@ -107,4 +106,3 @@ normalize(data, source) {
         return unique;
     }
 };
-
