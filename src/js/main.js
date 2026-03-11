@@ -178,13 +178,55 @@ const App = {
         this.setupMobileNavigation();
     },
 
-    setupMobileNavigation() {
+        setupMobileNavigation() {
         const navButtons = document.querySelectorAll('.nav-btn');
         const panels = {
             'map': document.getElementById('map'),
             'control-sidebar': document.querySelector('.control-sidebar'),
             'feed-sidebar': document.querySelector('.feed-sidebar')
         };
+
+        // Başlangıç durumu: Haritayı aktif et
+        if (window.innerWidth <= 768 && panels['map']) {
+            panels['map'].classList.add('mobile-active');
+        }
+
+        navButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const currentBtn = e.currentTarget;
+                const targetId = currentBtn.getAttribute('data-target');
+
+                // Kontrol: Eğer tıklanan buton zaten aktifse ve harita değilse, haritaya geri dön (paneli kapat)
+                if (currentBtn.classList.contains('active') && targetId !== 'map') {
+                    const mapBtn = Array.from(navButtons).find(b => b.getAttribute('data-target') === 'map');
+                    if (mapBtn) mapBtn.click();
+                    return; // İşlemi kes
+                }
+
+                // Normal işleyiş: Diğer aktif sınıfları temizle ve tıklanana ekle
+                navButtons.forEach(b => b.classList.remove('active'));
+                currentBtn.classList.add('active');
+
+                // Tüm panelleri gizle
+                Object.values(panels).forEach(panel => {
+                    if (panel) panel.classList.remove('mobile-active');
+                });
+                
+                // Hedef paneli göster
+                if (panels[targetId]) {
+                    panels[targetId].classList.add('mobile-active');
+                    
+                    // Mapbox Resize Tetikleyicisi
+                    if (targetId === 'map' && this.state.map) {
+                        setTimeout(() => {
+                            this.state.map.resize();
+                        }, 50);
+                    }
+                }
+            });
+        });
+    },
+
 
         // Eğer ekran mobil boyutlarındaysa ve harita div'i varsa başlangıçta haritayı aktif et
         if (window.innerWidth <= 768 && panels['map']) {
