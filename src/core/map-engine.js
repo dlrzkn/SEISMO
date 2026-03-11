@@ -22,20 +22,17 @@ export const MapEngine = {
 
             this.map.on('load', () => {
                 this.setupInteraction();
-                // Harita hazır olduğunda bir 'resize' tetikle (Tablet uyumu için)
                 this.map.resize();
             });
         });
     },
 
     initSources() {
-        // Deprem Kaynağı
         this.map.addSource('earthquakes', {
             type: 'geojson',
             data: { type: 'FeatureCollection', features: [] }
         });
 
-        // LEVHA SINIRLARI (Görseldeki kırmızı çizgiler)
         this.map.addSource('plates', {
             type: 'geojson',
             data: 'https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json'
@@ -53,56 +50,46 @@ export const MapEngine = {
                 'line-width': 1.5,
                 'line-dasharray': [2, 1],
                 'line-opacity': 0.6
-            }
+            },
+            layout: { 'visibility': 'none' } // Başlangıçta kapalı, butonla açılır
         });
 
-        // 2. Deprem Noktaları (Görseldeki Glow Efekti)
-   initLayers() {
-    this.map.addLayer({
-        id: 'earthquake-points',
-        type: 'circle',
-        source: 'earthquakes',
-        paint: {
-            // ZOOM VE BÜYÜKLÜK DENGESİ: Noktalar zoom yapınca devleşmez, 
-            // ama büyük depremler küçüklerden her zaman ayırt edilir.
-            'circle-radius': [
-                'interpolate', ['exponential', 1.5], ['zoom'],
-                1, ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 8, 8],  // Uzaktan (dünya geneli) çok küçük noktalar
-                10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30] // Yakından (yerel) detaylı ama kontrollü boyutlar
-            ],
+        // 2. Bilimsel Richter Skalalı Glow Noktalar
+        this.map.addLayer({
+            id: 'earthquake-points',
+            type: 'circle',
+            source: 'earthquakes',
+            paint: {
+                'circle-radius': [
+                    'interpolate', ['exponential', 1.5], ['zoom'],
+                    1, ['interpolate', ['linear'], ['get', 'mag'], 1, 1, 8, 8],
+                    10, ['interpolate', ['linear'], ['get', 'mag'], 1, 3, 8, 30]
+                ],
+                'circle-color': [
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    2.0, '#00d2ff',
+                    4.0, '#fceb5e',
+                    5.5, '#ff9100',
+                    7.0, '#ff1744',
+                    8.0, '#9c27b0'
+                ],
+                'circle-opacity': 0.75,
+                'circle-stroke-width': [
+                    'interpolate', ['linear'], ['zoom'],
+                    1, 0.5,
+                    10, 2
+                ],
+                'circle-stroke-color': '#ffffff',
+                'circle-stroke-opacity': 0.4,
+                'circle-blur': [
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    2, 0.1,
+                    7, 0.5
+                ]
+            }
+        });
+    },
 
-            // BİLİMSEL RICHTER SKALASI RENKLERİ:
-            'circle-color': [
-                'interpolate', ['linear'], ['get', 'mag'],
-                2.0, '#00d2ff', // Mikro (Siyan)
-                4.0, '#fceb5e', // Hafif (Sarı)
-                5.5, '#ff9100', // Orta (Turuncu)
-                7.0, '#ff1744', // Şiddetli (Kırmızı)
-                8.0, '#9c27b0'  // Felaket (Mor)
-            ],
-
-            // GLOW VE DERİNLİK EFEKTİ:
-            'circle-opacity': 0.75,
-            'circle-stroke-width': [
-                'interpolate', ['linear'], ['zoom'],
-                1, 0.5,
-                10, 2
-            ],
-            'circle-stroke-color': '#ffffff',
-            'circle-stroke-opacity': 0.4,
-            
-            // Parlama (Glow) miktarını Richter ölçeğine bağlıyoruz
-            'circle-blur': [
-                'interpolate', ['linear'], ['get', 'mag'],
-                2, 0.1,
-                7, 0.5
-            ]
-        }
-    });
-}
-
-
-    // GÖRSELDEKİ POPUP MANTIĞI
     setupInteraction() {
         this.map.on('click', 'earthquake-points', (e) => {
             const p = e.features[0].properties;
@@ -119,7 +106,7 @@ export const MapEngine = {
                         <div class="popup-body">
                             <p class="popup-place">${p.place}</p>
                             <div class="popup-grid">
-                                <div><small>DERİNLİK</small><br>${p.depth} KM</div>
+                                <div><small>DERİNLİK</small><br>${parseFloat(p.depth).toFixed(1)} KM</div>
                                 <div><small>SAAT</small><br>${new Date(p.time).toLocaleTimeString('tr-TR')}</div>
                             </div>
                         </div>
@@ -127,6 +114,10 @@ export const MapEngine = {
                 `)
                 .addTo(this.map);
         });
+
+        // Mouse imlecini değiştir
+        this.map.on('mouseenter', 'earthquake-points', () => { this.map.getCanvas().style.cursor = 'pointer'; });
+        this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
     },
 
     setupAtmosphere() {
