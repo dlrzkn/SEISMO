@@ -320,10 +320,12 @@ body {
 }
 
 /* DAR MOBİL EKRANLAR (Sekmeli Mobil Mimari) */
+/* DAR MOBİL EKRANLAR (Sekmeli Mobil Mimari) */
 @media (max-width: 768px) {
     .app-container { 
         flex-direction: column;
-        height: calc(100vh - var(--header-height) - 60px); /* Alt menü için 60px alan ayrıldı */
+        height: 100vh;
+        padding-bottom: 60px; /* Alt menü yüksekliği kadar boşluk */
     }
 
     .mobile-nav {
@@ -334,8 +336,10 @@ body {
         border-top: 1px solid var(--border-ui);
         height: 60px;
         width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
         z-index: 2000;
-        flex-shrink: 0;
         padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -356,7 +360,6 @@ body {
     .nav-btn .icon { font-size: 18px; }
     .nav-btn .label { font-size: 10px; font-weight: 600; }
 
-    /* Panelleri Tam Ekran Yap ve Sadece Aktif Olanı Göster */
     #map, .control-sidebar, .feed-sidebar {
         display: none !important;
         width: 100% !important;
@@ -366,13 +369,13 @@ body {
         order: unset !important;
     }
 
-    /* JavaScript tarafından tetiklenecek görünürlük sınıfları */
     #map.mobile-active { display: block !important; }
     .control-sidebar.mobile-active { display: flex !important; }
     .feed-sidebar.mobile-active { display: flex !important; }
 
     .map-legend { display: none; }
 }
+
 
 
 /* MİNİ EKRANLAR İÇİN FONT OPTİMİZASYONU */
