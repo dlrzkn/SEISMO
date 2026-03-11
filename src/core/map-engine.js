@@ -54,7 +54,50 @@ export const MapEngine = {
             layout: { 'visibility': 'none' }
         });
 
-        // 2. Özel Şiddetli Glow Katmanları (7, 8, 9)
+        // 2. Sismik Yoğunluk Analizi (Heatmap) - Seçimli Katman
+        this.map.addLayer({
+            id: 'earthquakes-heat',
+            type: 'heatmap',
+            source: 'earthquakes',
+            maxzoom: 9,
+            layout: { 'visibility': 'none' },
+            paint: {
+                // Büyüklüğe göre ağırlıklandırma
+                'heatmap-weight': [
+                    'interpolate', ['linear'], ['get', 'mag'],
+                    0, 0,
+                    7, 1
+                ],
+                // Global yoğunluk
+                'heatmap-intensity': [
+                    'interpolate', ['linear'], ['zoom'],
+                    0, 1,
+                    9, 3
+                ],
+                // Profesyonel Skala: Şeffaf -> Mavi -> Sarı -> Kırmızı
+                'heatmap-color': [
+                    'interpolate', ['linear'], ['heatmap-density'],
+                    0, 'rgba(33,102,172,0)',
+                    0.2, 'rgb(103,169,207)',
+                    0.4, 'rgb(209,229,240)',
+                    0.6, 'rgb(253,219,199)',
+                    0.8, 'rgb(239,138,98)',
+                    1, 'rgb(178,24,43)'
+                ],
+                'heatmap-radius': [
+                    'interpolate', ['linear'], ['zoom'],
+                    0, 2,
+                    9, 20
+                ],
+                'heatmap-opacity': [
+                    'interpolate', ['linear'], ['zoom'],
+                    7, 1,
+                    9, 0
+                ]
+            }
+        });
+
+        // 3. Özel Şiddetli Glow Katmanları (7, 8, 9)
         const glowLevels = [
             { id: 'glow-7', mag: 7.0, color: '#FF0000', blur: 1.0, opacity: 0.4, radBase: 20 },
             { id: 'glow-8', mag: 8.0, color: '#8B0000', blur: 1.5, opacity: 0.6, radBase: 35 },
@@ -72,12 +115,12 @@ export const MapEngine = {
                     'circle-color': level.color,
                     'circle-opacity': level.opacity,
                     'circle-blur': level.blur,
-                    'circle-pitch-alignment': 'map' // Perspektife göre yatay render
+                    'circle-pitch-alignment': 'map'
                 }
             });
         });
 
-        // 3. Genel Sismik Bloom (Depth-Sensitive)
+        // 4. Genel Sismik Bloom (Depth-Sensitive)
         this.map.addLayer({
             id: 'earthquake-glow',
             type: 'circle',
@@ -96,13 +139,13 @@ export const MapEngine = {
                 'circle-opacity': 0.15,
                 'circle-blur': [
                     'interpolate', ['linear'], ['get', 'depth'],
-                    0, 0.5,    // Sığ: Odaklı
-                    150, 2.0   // Derin: Dağınık/Bulanık
+                    0, 0.5,
+                    150, 2.0
                 ]
             }
         });
 
-        // 4. Ana Sismik Odak Noktaları (Jeofiziksel Model)
+        // 5. Ana Sismik Odak Noktaları
         this.map.addLayer({
             id: 'earthquake-points',
             type: 'circle',
@@ -120,8 +163,8 @@ export const MapEngine = {
                 ],
                 'circle-opacity': [
                     'interpolate', ['linear'], ['zoom'],
-                    2, 0.65, // Uzaktan kümeleri ayırt etmek için şeffaf
-                    10, 0.9  // Yakından detaylı görünüm
+                    2, 0.65,
+                    10, 0.9
                 ],
                 'circle-stroke-width': 1,
                 'circle-stroke-color': 'rgba(255,255,255,0.3)',
