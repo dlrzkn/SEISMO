@@ -134,6 +134,13 @@ const App = {
             this.state.map.flyTo({ center: coords, zoom: 8, duration: 2500, essential: true });
         };
     },
+        // Plaka Sınırları Toggle (Aç/Kapat)
+        document.getElementById('plate-boundaries')?.addEventListener('change', (e) => {
+            const visibility = e.target.checked ? 'visible' : 'none';
+            if (this.state.map.getLayer('plates-layer')) {
+                this.state.map.setLayoutProperty('plates-layer', 'visibility', visibility);
+            }
+        });
 
     startClock() {
         setInterval(() => {
