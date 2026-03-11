@@ -290,32 +290,47 @@ body {
 
     /* PANELLERİN ORTAK ÖZELLİĞİ (Bottom Sheet) */
     .control-sidebar, .feed-sidebar {
-        display: none !important; /* JS sınıf ekleyene kadar gizli */
-        position: absolute !important; bottom: 0; left: 0; width: 100% !important;
-        height: auto !important; max-height: 65vh !important; z-index: 1000;
-        background: rgba(13, 19, 30, 0.95); backdrop-filter: blur(25px);
-        border-top: 1px solid var(--accent) !important; border-radius: 20px 20px 0 0; 
-        padding: 20px 15px 80px 15px !important; box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
-        animation: slideUp 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        display: none !important; 
+        position: absolute !important; 
+        bottom: 0; 
+        left: 0; 
+        width: 100% !important;
+        height: 75vh !important; /* EKRANIN %75'İ KADAR UZA VE SCROLL OLUŞTUR */
+        z-index: 1000;
+        background: rgba(13, 19, 30, 0.95); 
+        backdrop-filter: blur(25px);
+        border-top: 1px solid var(--accent) !important; 
+        border-radius: 24px 24px 0 0; 
+        padding: 20px 15px 80px 15px !important; 
+        box-shadow: 0 -15px 50px rgba(0,0,0,0.8);
+        flex-direction: column; 
+        animation: slideUpSmooth 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
 
-    @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    /* SCROLL AYARLARI */
+    .feed-sidebar { overflow: hidden !important; }
+    .feed-sidebar .feed-scroll { 
+        overflow-y: auto !important; 
+        flex-grow: 1; 
+        min-height: 0; 
+        padding-bottom: 20px; 
+    }
+    .control-sidebar { overflow-y: auto !important; }
+
+    /* Premium Açılma Animasyonu */
+    @keyframes slideUpSmooth { 
+        from { transform: translateY(100%); } 
+        to { transform: translateY(0); } 
+    }
 
     /* --- SEKME MANTIĞI --- */
-    /* 1. LİSTE SEKMESİ AKTİFKEN */
     body.tab-list .feed-sidebar { display: flex !important; }
-
-    /* 2. ANALİZ SEKMESİ AKTİFKEN */
     body.tab-analysis .control-sidebar { display: flex !important; }
-    body.tab-analysis #card-layers { display: none !important; } /* Katmanları gizle */
-
-    /* 3. HARİTA SEKMESİ AKTİFKEN */
-    /* Normalde haritada panel yok, ancak dünya butonuna 2. kez basılırsa "show-layers" sınıfı gelir */
+    body.tab-analysis #card-layers { display: none !important; } 
     body.tab-map .control-sidebar { display: none !important; }
     body.tab-map.show-layers .control-sidebar { display: flex !important; }
     body.tab-map.show-layers #card-energy, 
-    body.tab-map.show-layers #card-analysis { display: none !important; } /* Enerji ve analizi gizle */
+    body.tab-map.show-layers #card-analysis { display: none !important; } 
 
     .map-legend { display: none; }
 }
-
