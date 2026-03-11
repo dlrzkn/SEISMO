@@ -71,9 +71,10 @@ renderAnalytics(analytics) {
         if (this.els.magValue) this.els.magValue.innerText = `${parseFloat(val).toFixed(1)} Mw`;
     },
 
-    updateStatus(text) {
-        if (this.els.status) this.els.status.innerText = `SİNYAL: ${text}`;
-    },
+  updateStatus(status) {
+    // "Güçlü Sinyal" yerine sadece "Güçlü"
+    this.els.status.innerText = `SİNYAL: ${status.replace(' SİNYAL', '')}`;
+  }
 
     updateActiveButtons(clickedBtn) {
         const parent = clickedBtn.parentElement;
