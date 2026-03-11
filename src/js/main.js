@@ -178,7 +178,7 @@ const App = {
         this.setupMobileNavigation();
     },
 
-        setupMobileNavigation() {
+    setupMobileNavigation() {
         const navButtons = document.querySelectorAll('.nav-btn');
         const panels = {
             'map': document.getElementById('map'),
@@ -227,42 +227,6 @@ const App = {
         });
     },
 
-
-        // Eğer ekran mobil boyutlarındaysa ve harita div'i varsa başlangıçta haritayı aktif et
-        if (window.innerWidth <= 768 && panels['map']) {
-            panels['map'].classList.add('mobile-active');
-        }
-
-        navButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // 1. Sekmelerdeki "active" sınıfını temizle ve tıklanana ekle
-                navButtons.forEach(b => b.classList.remove('active'));
-                const currentBtn = e.currentTarget;
-                currentBtn.classList.add('active');
-
-                // 2. Hedef paneli bul
-                const targetId = currentBtn.getAttribute('data-target');
-                
-                // 3. Tüm panelleri gizle
-                Object.values(panels).forEach(panel => {
-                    if (panel) panel.classList.remove('mobile-active');
-                });
-                
-                // 4. İlgili paneli göster
-                if (panels[targetId]) {
-                    panels[targetId].classList.add('mobile-active');
-                    
-                    // Mapbox Resize Tetikleyicisi (Harita sekmesine dönüldüğünde çökmemesi için)
-                    if (targetId === 'map' && this.state.map) {
-                        setTimeout(() => {
-                            this.state.map.resize();
-                        }, 50);
-                    }
-                }
-            });
-        });
-    },
-
     startClock() {
         const clockEl = document.getElementById('clock');
         if (!clockEl) return;
@@ -273,4 +237,3 @@ const App = {
 };
 
 App.init();
-
