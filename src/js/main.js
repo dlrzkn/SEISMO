@@ -39,8 +39,7 @@ const App = {
         try {
             this.state.map = await MapEngine.init(config);
             
-            // YENİ EKLENEN: Dar/Mobil ekranlarda optik dikey dengeyi sağlama. 
-            // Alt kısımdan verilen padding, dünyanın (kürenin) görsel merkezini yukarı iterek uzay boşluğunu dengeler.
+            // Dar/Mobil ekranlarda optik dikey dengeyi sağlama. 
             if (window.innerWidth <= 1024) {
                 this.state.map.setPadding({ bottom: 180 });
             }
@@ -58,7 +57,6 @@ const App = {
             UIController.updateStatus("SİSTEM HATASI");
         }
     },
-
 
     locateUserAndFly() {
         this.state.map.setZoom(1.5);
@@ -323,7 +321,7 @@ const App = {
             }
         });
 
-        // YENİ EKLENEN: Yüzen Durum Çubuğu Küçültme/Büyütme Mantığı
+        // Yüzen Durum Çubuğu Küçültme/Büyütme Mantığı
         const statusToggleBtn = document.getElementById('status-toggle');
         const floatingStatus = document.getElementById('floating-status');
 
@@ -333,17 +331,39 @@ const App = {
             const isMinimized = floatingStatus.classList.toggle('minimized');
             
             if (isMinimized) {
-                // Kapsül gizlendiğinde üstteki informasyon ikonu pasif renge döner
                 statusToggleBtn.classList.remove('active');
             } else {
-                // Kapsül açıldığında üstteki informasyon ikonu aktif renge (cyan) döner
                 statusToggleBtn.classList.add('active');
             }
         };
 
-        // Hem üstteki ikona hem de alttaki kapsüle tıklama dinleyicisi atanır
         statusToggleBtn?.addEventListener('click', toggleStatusBar);
         floatingStatus?.addEventListener('click', toggleStatusBar);
+
+        // YENİ EKLENEN: Harita boşluğuna / uzaya tıklayınca alt panelleri kapatma mekanizması
+        if (this.state.map) {
+            this.state.map.on('click', () => {
+                // Sadece mobil görünümde tetiklenmeli
+                if (window.innerWidth <= 1024) {
+                    const body = document.body;
+                    
+                    // Eğer herhangi bir panel açıksa
+                    if (body.classList.contains('show-layers') || body.classList.contains('tab-analysis') || body.classList.contains('tab-list')) {
+                        
+                        // Sınıfları temizleyerek panelleri gizle
+                        body.classList.remove('tab-analysis', 'tab-list', 'show-layers');
+                        body.classList.add('tab-map'); // Ana görünüme geri dön
+                        
+                        // Alt menüdeki (navbar) aktif ikonları sıfırla ve 'Harita' ikonunu aktif yap
+                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                        const mapBtn = document.querySelector('.nav-btn[data-target="map"]');
+                        if (mapBtn) {
+                            mapBtn.classList.add('active');
+                        }
+                    }
+                }
+            });
+        }
 
         window.focusEvent = (coords) => {
             if (!this.state.map) return;
@@ -424,3 +444,4 @@ const App = {
 };
 
 App.init();
+
