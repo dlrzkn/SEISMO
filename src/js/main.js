@@ -41,7 +41,6 @@ const App = {
         try {
             this.state.map = await MapEngine.init(config);
             
-            // Dar/Mobil ekranlarda optik dikey dengeyi sağlama. 
             if (window.innerWidth <= 1024) {
                 this.state.map.setPadding({ bottom: 180 });
             }
@@ -49,7 +48,6 @@ const App = {
             this.attachEventListeners();
             this.setupGlobeRotation();
             
-            // Lokasyon tespiti ve başlangıç görünüm ayarı
             this.locateUserAndFly();
             
             await this.dataCycle();
@@ -65,9 +63,9 @@ const App = {
         if (!this.state.map) return;
 
         const map = this.state.map;
-        const secondsPerRevolution = 120; // Tam bir tur için geçecek saniye
-        const maxSpinZoom = 5; // Rotasyonun duracağı maksimum yakınlaştırma seviyesi
-        const slowSpinZoom = 3; // Rotasyonun yavaşlamaya başlayacağı seviye
+        const secondsPerRevolution = 120;
+        const maxSpinZoom = 5;
+        const slowSpinZoom = 3;
 
         const spinGlobe = () => {
             const zoom = map.getZoom();
@@ -79,51 +77,43 @@ const App = {
                 }
                 const center = map.getCenter();
                 center.lng -= distancePerSecond;
-                map.easeTo({ center, duration: 1000, easing: (n) => n });
+                
+                map.easeTo({ center, duration: 1000, easing: (n) => n, essential: false });
             }
         };
 
         const pauseSpin = () => {
-            this.state.settings.userInteracting = true;
+            if (!this.state.settings.userInteracting) {
+                this.state.settings.userInteracting = true;
+                map.stop(); 
+            }
             if (this.state.settings.interactionTimeout) {
                 clearTimeout(this.state.settings.interactionTimeout);
             }
-            map.stop(); // Kullanıcı dokunduğunda animasyonu anında kes
         };
 
         const resumeSpin = () => {
             if (this.state.settings.interactionTimeout) {
                 clearTimeout(this.state.settings.interactionTimeout);
             }
-            // Etkileşim bittikten 2 saniye sonra rotasyonu başlat
             this.state.settings.interactionTimeout = setTimeout(() => {
                 this.state.settings.userInteracting = false;
                 spinGlobe();
             }, 2000); 
         };
 
-        // Etkileşim Başlangıç Olayları
-        map.on('mousedown', pauseSpin);
-        map.on('touchstart', pauseSpin);
-        map.on('dragstart', pauseSpin);
-        map.on('zoomstart', pauseSpin);
-        map.on('pitchstart', pauseSpin);
-        map.on('rotatestart', pauseSpin);
-
-        // Etkileşim Bitiş Olayları
-        map.on('mouseup', resumeSpin);
-        map.on('touchend', resumeSpin);
-        map.on('dragend', resumeSpin);
-        map.on('zoomend', resumeSpin);
-        map.on('pitchend', resumeSpin);
-        map.on('rotateend', resumeSpin);
-
-        // Her animasyon adımı (1000ms) bittiğinde döngüyü yeniden tetikler
-        map.on('moveend', () => {
-            spinGlobe();
+        map.on('movestart', (e) => {
+            if (e.originalEvent) pauseSpin(); 
         });
 
-        // Buton Entegrasyonu
+        map.on('moveend', (e) => {
+            if (!this.state.settings.userInteracting) {
+                spinGlobe();
+            } else {
+                resumeSpin();
+            }
+        });
+
         const rotationBtn = document.getElementById('rotation-toggle');
         if (rotationBtn) {
             rotationBtn.addEventListener('click', () => {
@@ -131,6 +121,7 @@ const App = {
                 if (this.state.settings.isRotating) {
                     rotationBtn.innerText = 'YÖRÜNGE: AKTİF';
                     rotationBtn.classList.add('active');
+                    this.state.settings.userInteracting = false;
                     spinGlobe();
                 } else {
                     rotationBtn.innerText = 'YÖRÜNGE: PASİF';
@@ -404,7 +395,6 @@ const App = {
             }
         });
 
-        // Yüzen Durum Çubuğu Küçültme/Büyütme Mantığı
         const statusToggleBtn = document.getElementById('status-toggle');
         const floatingStatus = document.getElementById('floating-status');
 
@@ -423,7 +413,6 @@ const App = {
         statusToggleBtn?.addEventListener('click', toggleStatusBar);
         floatingStatus?.addEventListener('click', toggleStatusBar);
 
-        // Harita boşluğuna / uzaya tıklayınca alt panelleri kapatma mekanizması
         if (this.state.map) {
             this.state.map.on('click', () => {
                 if (window.innerWidth <= 1024) {
@@ -452,7 +441,6 @@ const App = {
             }
             document.body.classList.remove('show-layers'); 
 
-            // Manuel fokus işlemi olduğunda da animasyonu gecici durdur ve sonra devam et
             this.state.settings.userInteracting = true;
             if (this.state.settings.interactionTimeout) {
                 clearTimeout(this.state.settings.interactionTimeout);
@@ -469,10 +457,8 @@ const App = {
                 const point = this.state.map.project(coords);
                 this.state.map.fire('click', { lngLat: { lng: coords[0], lat: coords[1] }, point: point });
                 
-                // Fokus bittikten sonra rotasyonu başlat
                 this.state.settings.interactionTimeout = setTimeout(() => {
                     this.state.settings.userInteracting = false;
-                    // Moveend olayı tetikleneceği için spinGlobe otomatik çağrılacaktır
                 }, 2000);
             });
         };
