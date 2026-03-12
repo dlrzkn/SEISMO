@@ -21,7 +21,17 @@
                 <small class="sub-logo">Sismolojik Analiz Terminali</small>
             </div>
         </div>
-        </header>
+
+        <div class="header-controls">
+            <button id="status-toggle" class="terminal-icon-btn active" title="Sistem Verilerini Aç/Kapat">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
 
     <main class="app-container">
         <div id="map"></div> 
@@ -107,7 +117,7 @@
         </aside>
     </main>
 
-    <div class="bottom-status-bar">
+    <div id="floating-status" class="bottom-status-bar" title="Gizlemek için tıklayın">
         <div id="connection-status" class="status-tag">SİNYAL: GÜÇLÜ</div>
         <div id="clock" class="mono-clock">00:00:00</div>
     </div>
@@ -153,4 +163,5 @@
     <script type="module" src="src/js/main.js"></script>
 </body>
 </html>
+
 
