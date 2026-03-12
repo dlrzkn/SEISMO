@@ -40,7 +40,7 @@
                     <button id="rotation-toggle" class="terminal-btn active">YÖRÜNGE: AKTİF</button>
                 </div>
                 <div class="control-row plate-row">
-                    <input type="checkbox" id="plate-boundaries" checked>
+                    <input type="checkbox" id="plate-boundaries" class="layer-checkbox" checked>
                     <label for="plate-boundaries" class="switch-label">LEVHA SINIRLARINI GÖSTER</label>
                 </div>
             </div>
@@ -99,21 +99,20 @@
                         <span class="sort-dir">▼</span>
                     </button>
                     <button id="sort-mag" class="sort-btn" data-sort="mag" data-order="desc" title="Büyüklüğe Göre Sırala">
-    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="4" y1="6" x2="20" y2="6"></line>
-        <line x1="4" y1="12" x2="14" y2="12"></line>
-        <line x1="4" y1="18" x2="8" y2="18"></line>
-    </svg>
-    <span class="sort-dir">▼</span>
-</button>
-
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="4" y1="6" x2="20" y2="6"></line>
+                            <line x1="4" y1="12" x2="14" y2="12"></line>
+                            <line x1="4" y1="18" x2="8" y2="18"></line>
+                        </svg>
+                        <span class="sort-dir">▼</span>
+                    </button>
                 </div>
             </div>
             <div id="earthquake-feed" class="feed-scroll"></div>
         </aside>
     </main>
 
-        <nav class="mobile-nav">
+    <nav class="mobile-nav">
         <button class="nav-btn active" data-target="map">
             <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -140,7 +139,6 @@
             <span class="label">KAYITLAR</span>
         </button>
     </nav>
-
 
     <footer class="map-legend">
         <div class="source-pills">
