@@ -38,8 +38,16 @@ const App = {
 
         try {
             this.state.map = await MapEngine.init(config);
+            
+            // YENİ EKLENEN: Dar/Mobil ekranlarda optik dikey dengeyi sağlama. 
+            // Alt kısımdan verilen padding, dünyanın (kürenin) görsel merkezini yukarı iterek uzay boşluğunu dengeler.
+            if (window.innerWidth <= 1024) {
+                this.state.map.setPadding({ bottom: 180 });
+            }
+
             this.attachEventListeners();
             
+            // Lokasyon tespiti ve başlangıç görünüm ayarı
             this.locateUserAndFly();
             
             await this.dataCycle();
@@ -50,6 +58,7 @@ const App = {
             UIController.updateStatus("SİSTEM HATASI");
         }
     },
+
 
     locateUserAndFly() {
         this.state.map.setZoom(1.5);
