@@ -22,8 +22,6 @@
             </div>
         </div>
 
-       
-
         <div class="system-meta">
             <div id="connection-status" class="status-tag">SİNYAL: GÜÇLÜ</div>
             <div id="clock" class="mono-clock">00:00:00</div>
@@ -96,8 +94,14 @@
                     <span id="event-count">0</span> <small>DEPREM</small>
                 </div>
                 <div class="feed-controls">
-                    <button id="sort-time" class="sort-btn active" title="Zamana Göre Sırala">🕒</button>
-                    <button id="sort-mag" class="sort-btn" title="Büyüklüğe Göre Sırala">📊</button>
+                    <button id="sort-time" class="sort-btn active" data-sort="time" data-order="desc" title="Zamana Göre Sırala">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span class="sort-dir">▼</span>
+                    </button>
+                    <button id="sort-mag" class="sort-btn" data-sort="mag" data-order="desc" title="Büyüklüğe Göre Sırala">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span class="sort-dir">▼</span>
+                    </button>
                 </div>
             </div>
             <div id="earthquake-feed" class="feed-scroll"></div>
@@ -115,7 +119,7 @@
         </button>
         <button class="nav-btn" data-target="list">
             <span class="icon">📍</span>
-            <span class="label">Liste</span>
+            <span class="label">Depremler</span>
         </button>
     </nav>
 
@@ -132,3 +136,4 @@
     <script type="module" src="src/js/main.js"></script>
 </body>
 </html>
+
