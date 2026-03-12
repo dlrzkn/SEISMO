@@ -146,28 +146,43 @@ export const MapEngine = {
         });
     },
 
-       setupInteraction() {
+    setupInteraction() {
         this.map.on('click', 'earthquake-points', (e) => {
             const p = e.features[0].properties;
             const coords = e.features[0].geometry.coordinates;
             const dateObj = new Date(p.time);
 
-            new mapboxgl.Popup({ offset: 15, className: 'seismo-popup' })
+            // WGS84 Standartları (4 Ondalık)
+            const lat = coords[1].toFixed(4);
+            const lng = coords[0].toFixed(4);
+
+            // Dinamik Büyüklük Renklendirmesi
+            const magColor = this.getMagColor(p.mag);
+
+            // Gutenberg-Richter Enerji Hesabı
+            const energyJoules = Math.pow(10, 4.8 + (1.5 * p.mag));
+            const energyFormatted = energyJoules.toExponential(2) + ' J';
+
+            new mapboxgl.Popup({ 
+                offset: [0, -15], 
+                closeButton: false, 
+                className: 'seismo-popup' 
+            })
                 .setLngLat(coords)
                 .setHTML(`
                     <div class="popup-main">
                         <div class="popup-header-block">
                             <span class="popup-source-tag">${p.source || 'VERİ KAYNAĞI'}</span>
-                            <div class="popup-mag-block">
+                            <div class="popup-mag-block" style="color: ${magColor};">
                                 <span class="popup-mag-value">${parseFloat(p.mag).toFixed(1)}</span>
-                                <small>Mw</small>
+                                <small style="font-size: 12px; color: var(--text-secondary);">Mw</small>
                             </div>
                         </div>
                         <div class="popup-place-block">${p.place}</div>
                         <div class="popup-data-grid" style="align-items: center;">
                             <div class="data-node">
                                 <div class="data-node-label">DERİNLİK</div>
-                                <div class="data-node-value">${parseFloat(p.depth).toFixed(1)} KM</div>
+                                <div class="data-node-value">${parseFloat(p.depth || 0).toFixed(1)} KM</div>
                             </div>
                             <div class="data-node">
                                 <div class="data-node-label">TARİH</div>
@@ -175,14 +190,20 @@ export const MapEngine = {
                             </div>
                             <div class="data-node">
                                 <div class="data-node-label">SAAT (TSI)</div>
-                                <div class="data-node-value">${dateObj.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'})}</div>
+                                <div class="data-node-value">${dateObj.toLocaleTimeString('tr-TR')}</div>
                             </div>
                             <div class="data-node">
                                 <div class="data-node-label">KOORDİNAT</div>
-                                <div class="data-node-value">${coords[1].toFixed(2)}N / ${coords[0].toFixed(2)}E</div>
+                                <div class="data-node-value">${lat}N / ${lng}E</div>
                             </div>
-                            <div class="data-node" style="padding-top: 4px;">
-                                <a href="${p.url}" target="_blank" class="popup-link-btn" style="width: 100%;">DETAYLI ANALİZ ↗</a>
+                            <div class="data-node" style="grid-column: span 2; margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(0,210,255,0.2);">
+                                <div class="data-node-label">SİSMİK ENERJİ SALINIMI (Es)</div>
+                                <div class="data-node-value" style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">
+                                    ${energyFormatted}
+                                </div>
+                            </div>
+                            <div class="data-node" style="grid-column: span 2; padding-top: 4px;">
+                                <a href="${p.url || '#'}" target="_blank" class="popup-link-btn" style="width: 100%;">DETAYLI ANALİZ ↗</a>
                             </div>
                         </div>
                     </div>
@@ -194,14 +215,13 @@ export const MapEngine = {
         this.map.on('mouseleave', 'earthquake-points', () => { this.map.getCanvas().style.cursor = ''; });
     },
 
-
     setupAtmosphere() {
         this.map.setFog({
             'range': [1, 10],
-            'color': '#0b1426',       // style.css'deki --bg-main ile uyumlu
-            'high-color': '#162235',  // Atmosferik geçiş
-            'space-color': '#000000', // Uzay derinliği
-            'star-intensity': 0.15    // Mapbox yıldızlarını azalttık (CSS yıldızları için yer açtık)
+            'color': '#0b1426',       
+            'high-color': '#162235',  
+            'space-color': '#000000', 
+            'star-intensity': 0.15    
         });
     },
 
@@ -212,5 +232,17 @@ export const MapEngine = {
                 source.setData(data);
             });
         }
+    },
+
+    getMagColor(mag) {
+        if (mag < 2.0) return '#D3D3D3';
+        if (mag < 3.0) return '#0000FF';
+        if (mag < 4.0) return '#00FF00';
+        if (mag < 5.0) return '#FFFF00';
+        if (mag < 6.0) return '#FFA500';
+        if (mag < 7.0) return '#FF8C00';
+        if (mag < 8.0) return '#FF0000';
+        if (mag < 9.0) return '#8B0000';
+        return '#4b0082';
     }
 };
