@@ -323,6 +323,28 @@ const App = {
             }
         });
 
+        // YENİ EKLENEN: Yüzen Durum Çubuğu Küçültme/Büyütme Mantığı
+        const statusToggleBtn = document.getElementById('status-toggle');
+        const floatingStatus = document.getElementById('floating-status');
+
+        const toggleStatusBar = () => {
+            if (!floatingStatus || !statusToggleBtn) return;
+            
+            const isMinimized = floatingStatus.classList.toggle('minimized');
+            
+            if (isMinimized) {
+                // Kapsül gizlendiğinde üstteki informasyon ikonu pasif renge döner
+                statusToggleBtn.classList.remove('active');
+            } else {
+                // Kapsül açıldığında üstteki informasyon ikonu aktif renge (cyan) döner
+                statusToggleBtn.classList.add('active');
+            }
+        };
+
+        // Hem üstteki ikona hem de alttaki kapsüle tıklama dinleyicisi atanır
+        statusToggleBtn?.addEventListener('click', toggleStatusBar);
+        floatingStatus?.addEventListener('click', toggleStatusBar);
+
         window.focusEvent = (coords) => {
             if (!this.state.map) return;
             
