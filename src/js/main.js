@@ -7,8 +7,12 @@ const App = {
         map: null,
         rawEvents: [],
         filteredEvents: [],
-        knownEventIds: new Set(), // YENİ: Sisteme giren depremlerin kimliklerini tutar
-        pulseMarkers: [],         // YENİ: Harita üzerindeki aktif animasyonları tutar
+        knownEventIds: new Set(),
+        pulseMarkers: [],
+        sorting: {
+            type: 'time',
+            order: 'desc'
+        },
         filters: {
             minMag: 0,
             timeRange: 'day',
@@ -84,12 +88,10 @@ const App = {
                 .filter(([_, status]) => status.online)
                 .map(([id, _]) => id);
 
-            // YENİ: Yeni verileri ayrıştırma mekanizması
             const newEvents = [];
             const isFirstLoad = this.state.knownEventIds.size === 0;
 
             this.state.rawEvents = geojson.features.map(f => {
-                // USGS veya EMSC'den gelen benzersiz ID'yi tespit et
                 const eventId = f.id || (f.properties && f.properties.id) || f.properties.time.toString(); 
 
                 if (!this.state.knownEventIds.has(eventId)) {
@@ -106,16 +108,15 @@ const App = {
                 }
 
                 return {
-                    id: eventId, // ID objeye dahil edildi
+                    id: eventId,
                     ...f.properties,
                     coordinates: f.geometry.coordinates.slice(0, 2),
                     depth: f.geometry.coordinates[2] || 0
                 };
             });
 
-            this.applyFilters(); // Arayüz ve liste güncellenir
+            this.applyFilters();
 
-            // YENİ: Yeni deprem varsa ilgili efektleri tetikle
             if (newEvents.length > 0) {
                 this.triggerMapPulse(newEvents);
                 this.triggerListHighlight(newEvents);
@@ -132,7 +133,6 @@ const App = {
         }
     },
 
-    // YENİ: Harita üzerindeki animasyonları oluşturur
     triggerMapPulse(newEvents) {
         if (!this.state.map) return;
 
@@ -146,7 +146,6 @@ const App = {
             const ring = document.createElement('div');
             ring.className = 'seismic-pulse-ring';
 
-            // Şiddete göre renk kodlaması
             if (ev.mag >= 5.0) {
                 ring.style.borderColor = 'var(--danger)';
                 core.style.backgroundColor = 'var(--danger)';
@@ -164,7 +163,6 @@ const App = {
 
             this.state.pulseMarkers.push(marker);
 
-            // 60 saniye sonra DOM'dan temizle
             setTimeout(() => {
                 marker.remove();
                 this.state.pulseMarkers = this.state.pulseMarkers.filter(m => m !== marker);
@@ -172,17 +170,13 @@ const App = {
         });
     },
 
-    // YENİ: Listedeki yeni öğeleri vurgular
     triggerListHighlight(newEvents) {
-        // ui.js DOM'u oluşturduktan hemen sonra çalışması için 100ms gecikme
         setTimeout(() => {
             newEvents.forEach(ev => {
-                // DOM üzerinde elementi bul
                 const listItem = document.getElementById(`eq-${ev.id}`);
                 if (listItem) {
                     listItem.classList.add('new-event-highlight');
                     
-                    // CSS animasyonu bitince sınıfı temizle
                     setTimeout(() => {
                         listItem.classList.remove('new-event-highlight');
                     }, 3000);
@@ -207,8 +201,23 @@ const App = {
             return mMatch && tMatch && dMatch;
         });
 
+        this.sortEvents();
         this.runAnalytics();
         this.syncUI();
+    },
+
+    sortEvents() {
+        const { type, order } = this.state.sorting;
+        const multiplier = order === 'desc' ? -1 : 1;
+
+        this.state.filteredEvents.sort((a, b) => {
+            if (type === 'time') {
+                return (a.time - b.time) * multiplier;
+            } else if (type === 'mag') {
+                return (a.mag - b.mag) * multiplier;
+            }
+            return 0;
+        });
     },
 
     runAnalytics() {
@@ -266,6 +275,28 @@ const App = {
                 if (depth) this.state.filters.depthFilter = depth;
                 UIController.updateActiveButtons(e.target);
                 this.applyFilters();
+            });
+        });
+
+        document.querySelectorAll('.sort-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const clickedBtn = e.currentTarget;
+                const sortType = clickedBtn.getAttribute('data-sort');
+                
+                if (this.state.sorting.type === sortType) {
+                    this.state.sorting.order = this.state.sorting.order === 'desc' ? 'asc' : 'desc';
+                } else {
+                    this.state.sorting.type = sortType;
+                    this.state.sorting.order = 'desc';
+                    
+                    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                    clickedBtn.classList.add('active');
+                }
+                
+                clickedBtn.setAttribute('data-order', this.state.sorting.order);
+                
+                this.sortEvents();
+                this.syncUI();
             });
         });
 
