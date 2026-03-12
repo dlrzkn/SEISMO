@@ -24,7 +24,7 @@ const App = {
             activeServices: []
         },
         settings: {
-            isRotating: true,
+            isRotating: false, // Başlangıçta pasif yapıldı
             shallowLimit: 70,
             userInteracting: false,
             interactionTimeout: null
@@ -116,6 +116,10 @@ const App = {
 
         const rotationBtn = document.getElementById('rotation-toggle');
         if (rotationBtn) {
+            // İlk yüklemede butonun görünümünü pasif olarak ayarla
+            rotationBtn.innerText = 'YÖRÜNGE: PASİF';
+            rotationBtn.classList.remove('active');
+
             rotationBtn.addEventListener('click', () => {
                 this.state.settings.isRotating = !this.state.settings.isRotating;
                 if (this.state.settings.isRotating) {
