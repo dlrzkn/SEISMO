@@ -173,8 +173,8 @@ export const MapEngine = {
                     <div class="popup-main">
                         <div class="popup-header-block">
                             <span class="popup-source-tag">${p.source || 'VERİ KAYNAĞI'}</span>
-                            <div class="popup-mag-block" style="color: ${magColor};">
-                                <span class="popup-mag-value">${parseFloat(p.mag).toFixed(1)}</span>
+                            <div class="popup-mag-block">
+                                <span class="popup-mag-value" style="color: ${magColor};">${parseFloat(p.mag).toFixed(1)}</span>
                                 <small style="font-size: 12px; color: var(--text-secondary);">Mw</small>
                             </div>
                         </div>
@@ -246,3 +246,4 @@ export const MapEngine = {
         return '#4b0082';
     }
 };
+
