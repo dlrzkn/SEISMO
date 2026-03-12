@@ -193,9 +193,41 @@ body {
 .earthquake-node:hover { background: rgba(0, 210, 255, 0.08); transform: translateX(-3px); border-color: rgba(0, 210, 255, 0.3); }
 .source-tag { position: absolute; top: 0; right: 0; font-size: 7px; padding: 3px 6px; background: var(--border-ui); border-bottom-left-radius: 6px; font-weight: 800; }
 
-.feed-controls { display: flex; gap: 5px; }
-.sort-btn { background: transparent; border: 1px solid var(--border-ui); color: var(--text-secondary); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-.sort-btn.active { background: var(--accent); border-color: var(--accent); color: #000; }
+/* SIRALAMA BUTONLARI VE YÖN KONTROLLERİ */
+.feed-controls { display: flex; gap: 8px; }
+
+.sort-btn { 
+    display: flex; 
+    align-items: center; 
+    gap: 6px; 
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid var(--border-ui); 
+    color: var(--text-secondary); 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    cursor: pointer; 
+    font-size: 10px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.sort-btn svg { stroke: currentColor; }
+
+.sort-btn.active { 
+    background: rgba(0, 210, 255, 0.1); 
+    border-color: var(--accent); 
+    color: var(--accent); 
+}
+
+.sort-dir { 
+    font-size: 8px; 
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
+}
+
+/* Yön "asc" (artan) olduğunda oku yukarı çevir */
+.sort-btn[data-order="asc"] .sort-dir { 
+    transform: rotate(180deg); 
+}
 
 /* 6. POP-UP (KİBAR VE SCROLL DESTEKLİ) */
 .seismo-popup .mapboxgl-popup-content {
@@ -293,8 +325,6 @@ body {
         animation: slideUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
 
-
-
     /* KESİLMEYİ ÖNLEYEN BLOCK/FLEX DİZİLİMİ */
     body.tab-list .feed-sidebar { display: flex !important; flex-direction: column; }
     body.tab-analysis .control-sidebar, 
@@ -354,3 +384,4 @@ body {
 .new-event-highlight {
     animation: highlightFlash 2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
+
