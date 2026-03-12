@@ -36,6 +36,10 @@ export const UIController = {
         events.forEach(eq => {
             const node = document.createElement('div');
             node.className = 'earthquake-node';
+            
+            // YENİ EKLENEN SATIR: main.js'in bu elementi bulabilmesi için benzersiz ID atanıyor
+            node.id = `eq-${eq.id}`; 
+            
             const color = this.getMagColor(eq.mag);
 
             node.innerHTML = `
@@ -68,7 +72,6 @@ export const UIController = {
         const ratio = parseFloat(analytics.shallowRatio) || 0;
         const deepRatio = (100 - ratio).toFixed(1);
         
-        // Yerleşim bozukluğunu gidermek için flex-justify eklendi
         this.els.analysis.innerHTML = `
             <div class="analysis-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span style="color: #ff4d4d; font-weight: 800; font-size: 10px;">SIĞ: %${ratio}</span>
@@ -111,3 +114,4 @@ export const UIController = {
         return '#4b0082';
     }
 };
+
