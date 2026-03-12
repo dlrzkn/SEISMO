@@ -113,9 +113,16 @@ export const MapEngine = {
                     10, ['interpolate', ['linear'], ['get', 'mag'], 1, 15, 8, 80]
                 ],
                 'circle-color': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
-                    5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
+                    'step', ['get', 'mag'],
+                    '#D3D3D3',
+                    2.0, '#0000FF',
+                    3.0, '#00FF00',
+                    4.0, '#FFFF00',
+                    5.0, '#FFA500',
+                    6.0, '#FF8C00',
+                    7.0, '#FF0000',
+                    8.0, '#8B0000',
+                    9.0, '#4b0082'
                 ],
                 'circle-opacity': 0.15,
                 'circle-blur': ['interpolate', ['linear'], ['get', 'depth'], 0, 0.5, 150, 2.0]
@@ -134,9 +141,16 @@ export const MapEngine = {
                     10, ['interpolate', ['linear'], ['get', 'mag'], 1, 4, 8, 35]
                 ],
                 'circle-color': [
-                    'interpolate', ['linear'], ['get', 'mag'],
-                    0.0, '#D3D3D3', 2.0, '#0000FF', 3.0, '#00FF00', 4.0, '#FFFF00',
-                    5.0, '#FFA500', 6.0, '#FF8C00', 7.0, '#FF0000', 8.0, '#8B0000', 9.0, '#4b0082'
+                    'step', ['get', 'mag'],
+                    '#D3D3D3',
+                    2.0, '#0000FF',
+                    3.0, '#00FF00',
+                    4.0, '#FFFF00',
+                    5.0, '#FFA500',
+                    6.0, '#FF8C00',
+                    7.0, '#FF0000',
+                    8.0, '#8B0000',
+                    9.0, '#4b0082'
                 ],
                 'circle-opacity': ['interpolate', ['linear'], ['zoom'], 2, 0.65, 10, 0.9],
                 'circle-stroke-width': 1,
@@ -246,4 +260,3 @@ export const MapEngine = {
         return '#4b0082';
     }
 };
-
