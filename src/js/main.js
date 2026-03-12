@@ -7,6 +7,8 @@ const App = {
         map: null,
         rawEvents: [],
         filteredEvents: [],
+        knownEventIds: new Set(), // YENİ: Sisteme giren depremlerin kimliklerini tutar
+        pulseMarkers: [],         // YENİ: Harita üzerindeki aktif animasyonları tutar
         filters: {
             minMag: 0,
             timeRange: 'day',
@@ -34,7 +36,6 @@ const App = {
             this.state.map = await MapEngine.init(config);
             this.attachEventListeners();
             
-            // Lokasyon tespiti ve başlangıç görünüm ayarı
             this.locateUserAndFly();
             
             await this.dataCycle();
@@ -47,14 +48,11 @@ const App = {
     },
 
     locateUserAndFly() {
-        // Harita başlangıç zoom seviyesini küçült (uzaklaştır)
         this.state.map.setZoom(1.5);
 
-        // Geolocation API ile kullanıcının konumunu tespit et
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition((position) => {
                 const { longitude, latitude } = position.coords;
-                // Kullanıcının konumuna animasyonlu geçiş
                 this.state.map.flyTo({
                     center: [longitude, latitude],
                     zoom: 3.8,
@@ -62,7 +60,6 @@ const App = {
                     essential: true
                 });
             }, () => {
-                // İzin reddedilirse veya hata oluşursa varsayılan konuma (Türkiye) uç
                 this.state.map.flyTo({
                     center: [35.2433, 38.9637],
                     zoom: 3.8,
@@ -70,7 +67,6 @@ const App = {
                 });
             });
         } else {
-            // Tarayıcı desteklemiyorsa varsayılan konuma uç
             this.state.map.flyTo({
                 center: [35.2433, 38.9637],
                 zoom: 3.8,
@@ -88,13 +84,42 @@ const App = {
                 .filter(([_, status]) => status.online)
                 .map(([id, _]) => id);
 
-            this.state.rawEvents = geojson.features.map(f => ({
-                ...f.properties,
-                coordinates: f.geometry.coordinates.slice(0, 2),
-                depth: f.geometry.coordinates[2] || 0
-            }));
+            // YENİ: Yeni verileri ayrıştırma mekanizması
+            const newEvents = [];
+            const isFirstLoad = this.state.knownEventIds.size === 0;
 
-            this.applyFilters();
+            this.state.rawEvents = geojson.features.map(f => {
+                // USGS veya EMSC'den gelen benzersiz ID'yi tespit et
+                const eventId = f.id || (f.properties && f.properties.id) || f.properties.time.toString(); 
+
+                if (!this.state.knownEventIds.has(eventId)) {
+                    this.state.knownEventIds.add(eventId);
+                    
+                    if (!isFirstLoad) {
+                        newEvents.push({
+                            id: eventId,
+                            mag: f.properties.mag,
+                            coordinates: f.geometry.coordinates.slice(0, 2),
+                            depth: f.geometry.coordinates[2] || 0
+                        });
+                    }
+                }
+
+                return {
+                    id: eventId, // ID objeye dahil edildi
+                    ...f.properties,
+                    coordinates: f.geometry.coordinates.slice(0, 2),
+                    depth: f.geometry.coordinates[2] || 0
+                };
+            });
+
+            this.applyFilters(); // Arayüz ve liste güncellenir
+
+            // YENİ: Yeni deprem varsa ilgili efektleri tetikle
+            if (newEvents.length > 0) {
+                this.triggerMapPulse(newEvents);
+                this.triggerListHighlight(newEvents);
+            }
 
             const statusMsg = this.state.analytics.activeServices.length > 0 
                 ? `SİNYAL: ${this.state.analytics.activeServices.join(' + ')}`
@@ -105,6 +130,65 @@ const App = {
             console.error("Veri Döngüsü Hatası:", err);
             UIController.updateStatus("BAĞLANTI KESİLDİ");
         }
+    },
+
+    // YENİ: Harita üzerindeki animasyonları oluşturur
+    triggerMapPulse(newEvents) {
+        if (!this.state.map) return;
+
+        newEvents.forEach(ev => {
+            const el = document.createElement('div');
+            el.className = 'seismic-pulse-container';
+            
+            const core = document.createElement('div');
+            core.className = 'seismic-pulse-core';
+            
+            const ring = document.createElement('div');
+            ring.className = 'seismic-pulse-ring';
+
+            // Şiddete göre renk kodlaması
+            if (ev.mag >= 5.0) {
+                ring.style.borderColor = 'var(--danger)';
+                core.style.backgroundColor = 'var(--danger)';
+            } else {
+                ring.style.borderColor = 'var(--accent)';
+                core.style.backgroundColor = 'var(--accent)';
+            }
+
+            el.appendChild(core);
+            el.appendChild(ring);
+
+            const marker = new mapboxgl.Marker({ element: el })
+                .setLngLat(ev.coordinates)
+                .addTo(this.state.map);
+
+            this.state.pulseMarkers.push(marker);
+
+            // 60 saniye sonra DOM'dan temizle
+            setTimeout(() => {
+                marker.remove();
+                this.state.pulseMarkers = this.state.pulseMarkers.filter(m => m !== marker);
+            }, 60000); 
+        });
+    },
+
+    // YENİ: Listedeki yeni öğeleri vurgular
+    triggerListHighlight(newEvents) {
+        // ui.js DOM'u oluşturduktan hemen sonra çalışması için 100ms gecikme
+        setTimeout(() => {
+            newEvents.forEach(ev => {
+                // DOM üzerinde elementi bul
+                const listItem = document.getElementById(`eq-${ev.id}`);
+                if (listItem) {
+                    listItem.classList.add('new-event-highlight');
+                    
+                    // CSS animasyonu bitince sınıfı temizle
+                    setTimeout(() => {
+                        listItem.classList.remove('new-event-highlight');
+                    }, 3000);
+                }
+            });
+        }, 100);
     },
 
     applyFilters() {
