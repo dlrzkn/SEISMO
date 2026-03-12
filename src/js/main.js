@@ -35,7 +35,7 @@ const App = {
         this.startClock();
         
         const config = {
-            token: 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbWY2ZG5pNDA0cmwycnNodm1jdTN3cmQifQ.Sf5rAPwn1JZfwpDF_blj8Q'
+            token: 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbW5pbHRjcjAzMjYydHMyMWg2ZXh2ZHQifQ.YMHYofqKXJGp-31SAIvH0g'
         };
 
         try {
