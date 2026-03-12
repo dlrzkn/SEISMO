@@ -270,6 +270,7 @@ body {
     .nav-btn .label { font-size: 10px; font-weight: 600; }
 
     /* PANELLERİN ORTAK TASARIMI (Bottom Sheet) */
+    /* PANELLERİN ORTAK TASARIMI (Bottom Sheet) */
     .control-sidebar, .feed-sidebar {
         display: none !important; 
         position: absolute !important; 
@@ -279,10 +280,14 @@ body {
         backdrop-filter: blur(25px);
         border-top: 1px solid var(--accent) !important; 
         border-radius: 24px 24px 0 0; 
-        padding: 20px 15px 40px 15px !important; 
+        
+        /* GÜNCELLEME: Alt boşluk nav bar yüksekliği (60px) + güvenlik marjı (30px) olarak ayarlandı */
+        padding: 20px 15px 90px 15px !important; 
+        
         box-shadow: 0 -15px 50px rgba(0,0,0,0.8);
         animation: slideUpSmooth 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
     }
+
 
     /* KESİLMEYİ ÖNLEYEN BLOCK/FLEX DİZİLİMİ */
     body.tab-list .feed-sidebar { display: flex !important; flex-direction: column; }
