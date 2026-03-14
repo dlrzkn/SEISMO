@@ -2,7 +2,7 @@ export const MapEngine = {
     map: null,
 
     async init(config) {
-        mapboxgl.accessToken = config.token;
+        mapboxgl.accessToken = 'pk.eyJ1IjoiZGxyemtuIiwiYSI6ImNtbW5pbHRjcjAzMjYydHMyMWg2ZXh2ZHQifQ.YMHYofqKXJGp-31SAIvH0g';
         this.map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/satellite-streets-v12',
